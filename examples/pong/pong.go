@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/shadowapex/godot-go/godot"
 	"log"
+
+	"github.com/shadowapex/godot-go/godot"
+	"github.com/shadowapex/godot-go/godot/classes/node2d"
 )
 
 // NewPongClass is a constructor that we can pass to godot.
@@ -16,7 +18,7 @@ func NewPongClass() godot.Class {
 
 // PongClass is a simple go struct that can be attached to a Godot Node2D object.
 type PongClass struct {
-	godot.Node2D
+	node2d.Node2D
 	direction *godot.Vector2
 }
 
