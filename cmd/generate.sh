@@ -29,6 +29,15 @@ else
     echo "The 'godot' binary was not found in \$PATH. Using previously generated godot_api.json in repository..."
 fi
 
+# Clean old generated classes
+echo "Cleaning old generated classes..."
+find $PKG_PATH/godot/classes/ -maxdepth 2 -type f -name '*.go' ! -name 'class.go' -delete
+find $PKG_PATH/godot/classes/ -maxdepth 1 -type d ! -name 'classes' ! -name 'class' -delete
+
 # Run our generator
 echo "Generating Godot classes..."
-go run $GOPATH/src/github.com/shadowapex/godot-go/cmd/generate/generate.go | gofmt > $PKG_PATH/godot/classes.go
+go run $GOPATH/src/github.com/shadowapex/godot-go/cmd/generate/generate.go
+
+# Format all our code
+echo "Running gofmt on generated classes..."
+find $PKG_PATH -name '*.go' -exec gofmt -w {} \;

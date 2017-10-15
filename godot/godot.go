@@ -40,6 +40,8 @@ import (
 	"runtime"
 	"strings"
 	"unsafe"
+
+	"github.com/shadowapex/godot-go/godot/classes/class"
 )
 
 const (
@@ -49,7 +51,7 @@ const (
 
 // ClassConstructor is any function that will build and return a class to be registered
 // with Godot.
-type ClassConstructor func() Class
+type ClassConstructor func() class.Class
 
 /** Library entry point **/
 // godot_gdnative_init is the library entry point. When the library is loaded

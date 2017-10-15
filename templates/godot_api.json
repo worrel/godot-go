@@ -28983,7 +28983,213 @@
 						"default_value": ""
 					}
 				]
+<<<<<<< HEAD
 			},
+=======
+			}
+		],
+		"enums": [
+		]
+	},
+	{
+		"name": "Font",
+		"base_class": "Resource",
+		"api_type": "core",
+		"singleton": false,
+		"instanciable": false,
+		"is_reference": true,
+		"constants": {
+		},
+		"properties": [
+		],
+		"signals": [
+		],
+		"methods": [
+			{
+				"name": "draw",
+				"return_type": "void",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+					{
+						"name": "canvas_item",
+						"type": "RID",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "position",
+						"type": "Vector2",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "string",
+						"type": "String",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "modulate",
+						"type": "Color",
+						"has_default_value": true,
+						"default_value": "1,1,1,1"
+					},
+					{
+						"name": "clip_w",
+						"type": "int",
+						"has_default_value": true,
+						"default_value": "-1"
+					}
+				]
+			},
+			{
+				"name": "get_ascent",
+				"return_type": "float",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+				]
+			},
+			{
+				"name": "get_descent",
+				"return_type": "float",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+				]
+			},
+			{
+				"name": "get_height",
+				"return_type": "float",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+				]
+			},
+			{
+				"name": "is_distance_field_hint",
+				"return_type": "bool",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+				]
+			},
+			{
+				"name": "get_string_size",
+				"return_type": "Vector2",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+					{
+						"name": "string",
+						"type": "String",
+						"has_default_value": false,
+						"default_value": ""
+					}
+				]
+			},
+			{
+				"name": "draw_char",
+				"return_type": "float",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+					{
+						"name": "canvas_item",
+						"type": "RID",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "position",
+						"type": "Vector2",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "char",
+						"type": "int",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "next",
+						"type": "int",
+						"has_default_value": true,
+						"default_value": "-1"
+					},
+					{
+						"name": "modulate",
+						"type": "Color",
+						"has_default_value": true,
+						"default_value": "1,1,1,1"
+					}
+				]
+			},
+			{
+				"name": "update_changes",
+				"return_type": "void",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": false,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+				]
+			}
+		],
+		"enums": [
+		]
+	},
+	{
+		"name": "Theme",
+		"base_class": "Resource",
+		"api_type": "core",
+		"singleton": false,
+		"instanciable": true,
+		"is_reference": true,
+		"constants": {
+		},
+		"properties": [
+>>>>>>> Progress on splitting up generated classes into their own packages
 			{
 				"name": "get_angular_velocity",
 				"return_type": "Vector3",
@@ -29614,13 +29820,21 @@
 		]
 	},
 	{
+<<<<<<< HEAD
 		"name": "Theme",
 		"base_class": "Resource",
+=======
+		"name": "ImageTexture",
+		"base_class": "Texture",
+>>>>>>> Progress on splitting up generated classes into their own packages
 		"api_type": "core",
 		"singleton": false,
 		"instanciable": true,
 		"is_reference": true,
 		"constants": {
+			"STORAGE_RAW": 0,
+			"STORAGE_COMPRESS_LOSSY": 1,
+			"STORAGE_COMPRESS_LOSSLESS": 2
 		},
 		"properties": [
 			{
@@ -29635,7 +29849,11 @@
 		],
 		"methods": [
 			{
+<<<<<<< HEAD
 				"name": "set_icon",
+=======
+				"name": "create",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"return_type": "void",
 				"is_editor": false,
 				"is_noscript": false,
@@ -29646,53 +29864,98 @@
 				"is_from_script": false,
 				"arguments": [
 					{
+<<<<<<< HEAD
 						"name": "name",
 						"type": "String",
+=======
+						"name": "width",
+						"type": "int",
+>>>>>>> Progress on splitting up generated classes into their own packages
 						"has_default_value": false,
 						"default_value": ""
 					},
 					{
+<<<<<<< HEAD
 						"name": "type",
 						"type": "String",
+=======
+						"name": "height",
+						"type": "int",
+>>>>>>> Progress on splitting up generated classes into their own packages
 						"has_default_value": false,
 						"default_value": ""
 					},
 					{
+<<<<<<< HEAD
 						"name": "texture",
 						"type": "Texture",
 						"has_default_value": false,
 						"default_value": ""
+=======
+						"name": "format",
+						"type": "int",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "flags",
+						"type": "int",
+						"has_default_value": true,
+						"default_value": "7"
+>>>>>>> Progress on splitting up generated classes into their own packages
 					}
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "get_icon",
 				"return_type": "Texture",
+=======
+				"name": "create_from_image",
+				"return_type": "void",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
-				"is_const": true,
+				"is_const": false,
 				"is_reverse": false,
 				"is_virtual": false,
 				"has_varargs": false,
 				"is_from_script": false,
 				"arguments": [
 					{
+<<<<<<< HEAD
 						"name": "name",
 						"type": "String",
+=======
+						"name": "image",
+						"type": "Image",
+>>>>>>> Progress on splitting up generated classes into their own packages
 						"has_default_value": false,
 						"default_value": ""
 					},
 					{
+<<<<<<< HEAD
 						"name": "type",
 						"type": "String",
 						"has_default_value": false,
 						"default_value": ""
+=======
+						"name": "flags",
+						"type": "int",
+						"has_default_value": true,
+						"default_value": "7"
+>>>>>>> Progress on splitting up generated classes into their own packages
 					}
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "has_icon",
 				"return_type": "bool",
+=======
+				"name": "get_format",
+				"return_type": "enum.Image::Format",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
 				"is_const": true,
@@ -29716,7 +29979,11 @@
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "clear_icon",
+=======
+				"name": "load",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"return_type": "void",
 				"is_editor": false,
 				"is_noscript": false,
@@ -29727,6 +29994,7 @@
 				"is_from_script": false,
 				"arguments": [
 					{
+<<<<<<< HEAD
 						"name": "name",
 						"type": "String",
 						"has_default_value": false,
@@ -29734,6 +30002,9 @@
 					},
 					{
 						"name": "type",
+=======
+						"name": "path",
+>>>>>>> Progress on splitting up generated classes into their own packages
 						"type": "String",
 						"has_default_value": false,
 						"default_value": ""
@@ -29741,26 +30012,40 @@
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "get_icon_list",
 				"return_type": "PoolStringArray",
+=======
+				"name": "set_data",
+				"return_type": "void",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
-				"is_const": true,
+				"is_const": false,
 				"is_reverse": false,
 				"is_virtual": false,
 				"has_varargs": false,
 				"is_from_script": false,
 				"arguments": [
 					{
+<<<<<<< HEAD
 						"name": "type",
 						"type": "String",
+=======
+						"name": "image",
+						"type": "Image",
+>>>>>>> Progress on splitting up generated classes into their own packages
 						"has_default_value": false,
 						"default_value": ""
 					}
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "set_stylebox",
+=======
+				"name": "set_storage",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"return_type": "void",
 				"is_editor": false,
 				"is_noscript": false,
@@ -29771,6 +30056,7 @@
 				"is_from_script": false,
 				"arguments": [
 					{
+<<<<<<< HEAD
 						"name": "name",
 						"type": "String",
 						"has_default_value": false,
@@ -29779,6 +30065,10 @@
 					{
 						"name": "type",
 						"type": "String",
+=======
+						"name": "mode",
+						"type": "int",
+>>>>>>> Progress on splitting up generated classes into their own packages
 						"has_default_value": false,
 						"default_value": ""
 					},
@@ -29791,8 +30081,13 @@
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "get_stylebox",
 				"return_type": "StyleBox",
+=======
+				"name": "get_storage",
+				"return_type": "enum.ImageTexture::Storage",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
 				"is_const": true,
@@ -29801,47 +30096,10 @@
 				"has_varargs": false,
 				"is_from_script": false,
 				"arguments": [
-					{
-						"name": "name",
-						"type": "String",
-						"has_default_value": false,
-						"default_value": ""
-					},
-					{
-						"name": "type",
-						"type": "String",
-						"has_default_value": false,
-						"default_value": ""
-					}
 				]
 			},
 			{
-				"name": "has_stylebox",
-				"return_type": "bool",
-				"is_editor": false,
-				"is_noscript": false,
-				"is_const": true,
-				"is_reverse": false,
-				"is_virtual": false,
-				"has_varargs": false,
-				"is_from_script": false,
-				"arguments": [
-					{
-						"name": "name",
-						"type": "String",
-						"has_default_value": false,
-						"default_value": ""
-					},
-					{
-						"name": "type",
-						"type": "String",
-						"has_default_value": false,
-						"default_value": ""
-					}
-				]
-			},
-			{
-				"name": "clear_stylebox",
+				"name": "set_lossy_storage_quality",
 				"return_type": "void",
 				"is_editor": false,
 				"is_noscript": false,
@@ -29851,6 +30109,147 @@
 				"has_varargs": false,
 				"is_from_script": false,
 				"arguments": [
+					{
+<<<<<<< HEAD
+						"name": "name",
+						"type": "String",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "type",
+						"type": "String",
+						"has_default_value": false,
+						"default_value": ""
+=======
+						"name": "quality",
+						"type": "float",
+						"has_default_value": false,
+						"default_value": ""
+					}
+				]
+			},
+			{
+				"name": "get_lossy_storage_quality",
+				"return_type": "float",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+				]
+			},
+			{
+				"name": "set_size_override",
+				"return_type": "void",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": false,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+					{
+						"name": "size",
+						"type": "Vector2",
+						"has_default_value": false,
+						"default_value": ""
+>>>>>>> Progress on splitting up generated classes into their own packages
+					}
+				]
+			},
+			{
+<<<<<<< HEAD
+				"name": "has_stylebox",
+				"return_type": "bool",
+=======
+				"name": "_reload_hook",
+				"return_type": "void",
+>>>>>>> Progress on splitting up generated classes into their own packages
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": true,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+					{
+<<<<<<< HEAD
+						"name": "name",
+						"type": "String",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "type",
+						"type": "String",
+=======
+						"name": "rid",
+						"type": "RID",
+>>>>>>> Progress on splitting up generated classes into their own packages
+						"has_default_value": false,
+						"default_value": ""
+					}
+				]
+<<<<<<< HEAD
+			},
+			{
+				"name": "clear_stylebox",
+				"return_type": "void",
+=======
+			}
+		],
+		"enums": [
+			{
+				"name": "Storage",
+				"values": {
+					"STORAGE_RAW": 0,
+					"STORAGE_COMPRESS_LOSSY": 1,
+					"STORAGE_COMPRESS_LOSSLESS": 2
+				}
+			}
+		]
+	},
+	{
+		"name": "Texture",
+		"base_class": "Resource",
+		"api_type": "core",
+		"singleton": false,
+		"instanciable": false,
+		"is_reference": true,
+		"constants": {
+			"FLAG_MIPMAPS": 1,
+			"FLAG_REPEAT": 2,
+			"FLAG_FILTER": 4,
+			"FLAG_VIDEO_SURFACE": 4096,
+			"FLAGS_DEFAULT": 7,
+			"FLAG_ANISOTROPIC_FILTER": 8,
+			"FLAG_CONVERT_TO_LINEAR": 16,
+			"FLAG_MIRRORED_REPEAT": 32
+		},
+		"properties": [
+		],
+		"signals": [
+		],
+		"methods": [
+			{
+				"name": "get_width",
+				"return_type": "int",
+>>>>>>> Progress on splitting up generated classes into their own packages
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+<<<<<<< HEAD
 					{
 						"name": "name",
 						"type": "String",
@@ -29868,6 +30267,13 @@
 			{
 				"name": "get_stylebox_list",
 				"return_type": "PoolStringArray",
+=======
+				]
+			},
+			{
+				"name": "get_height",
+				"return_type": "int",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
 				"is_const": true,
@@ -29876,6 +30282,7 @@
 				"has_varargs": false,
 				"is_from_script": false,
 				"arguments": [
+<<<<<<< HEAD
 					{
 						"name": "type",
 						"type": "String",
@@ -29887,6 +30294,13 @@
 			{
 				"name": "get_stylebox_types",
 				"return_type": "PoolStringArray",
+=======
+				]
+			},
+			{
+				"name": "get_size",
+				"return_type": "Vector2",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
 				"is_const": true,
@@ -29898,7 +30312,24 @@
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "set_font",
+=======
+				"name": "has_alpha",
+				"return_type": "bool",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+				]
+			},
+			{
+				"name": "set_flags",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"return_type": "void",
 				"is_editor": false,
 				"is_noscript": false,
@@ -29909,6 +30340,7 @@
 				"is_from_script": false,
 				"arguments": [
 					{
+<<<<<<< HEAD
 						"name": "name",
 						"type": "String",
 						"has_default_value": false,
@@ -29923,14 +30355,23 @@
 					{
 						"name": "font",
 						"type": "Font",
+=======
+						"name": "flags",
+						"type": "int",
+>>>>>>> Progress on splitting up generated classes into their own packages
 						"has_default_value": false,
 						"default_value": ""
 					}
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "get_font",
 				"return_type": "Font",
+=======
+				"name": "get_flags",
+				"return_type": "int",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
 				"is_const": true,
@@ -29939,6 +30380,7 @@
 				"has_varargs": false,
 				"is_from_script": false,
 				"arguments": [
+<<<<<<< HEAD
 					{
 						"name": "name",
 						"type": "String",
@@ -29956,6 +30398,13 @@
 			{
 				"name": "has_font",
 				"return_type": "bool",
+=======
+				]
+			},
+			{
+				"name": "draw",
+				"return_type": "void",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
 				"is_const": true,
@@ -29965,12 +30414,18 @@
 				"is_from_script": false,
 				"arguments": [
 					{
+<<<<<<< HEAD
 						"name": "name",
 						"type": "String",
+=======
+						"name": "canvas_item",
+						"type": "RID",
+>>>>>>> Progress on splitting up generated classes into their own packages
 						"has_default_value": false,
 						"default_value": ""
 					},
 					{
+<<<<<<< HEAD
 						"name": "type",
 						"type": "String",
 						"has_default_value": false,
@@ -29992,20 +30447,48 @@
 					{
 						"name": "name",
 						"type": "String",
+=======
+						"name": "position",
+						"type": "Vector2",
+>>>>>>> Progress on splitting up generated classes into their own packages
 						"has_default_value": false,
 						"default_value": ""
 					},
 					{
+<<<<<<< HEAD
 						"name": "type",
 						"type": "String",
 						"has_default_value": false,
 						"default_value": ""
+=======
+						"name": "modulate",
+						"type": "Color",
+						"has_default_value": true,
+						"default_value": "1,1,1,1"
+					},
+					{
+						"name": "transpose",
+						"type": "bool",
+						"has_default_value": true,
+						"default_value": "False"
+					},
+					{
+						"name": "normal_map",
+						"type": "Texture",
+						"has_default_value": true,
+						"default_value": "Null"
+>>>>>>> Progress on splitting up generated classes into their own packages
 					}
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "get_font_list",
 				"return_type": "PoolStringArray",
+=======
+				"name": "draw_rect",
+				"return_type": "void",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
 				"is_const": true,
@@ -30015,6 +30498,7 @@
 				"is_from_script": false,
 				"arguments": [
 					{
+<<<<<<< HEAD
 						"name": "type",
 						"type": "String",
 						"has_default_value": false,
@@ -30036,10 +30520,21 @@
 					{
 						"name": "name",
 						"type": "String",
+=======
+						"name": "canvas_item",
+						"type": "RID",
 						"has_default_value": false,
 						"default_value": ""
 					},
 					{
+						"name": "rect",
+						"type": "Rect2",
+>>>>>>> Progress on splitting up generated classes into their own packages
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+<<<<<<< HEAD
 						"name": "type",
 						"type": "String",
 						"has_default_value": false,
@@ -30048,14 +30543,41 @@
 					{
 						"name": "color",
 						"type": "Color",
+=======
+						"name": "tile",
+						"type": "bool",
+>>>>>>> Progress on splitting up generated classes into their own packages
 						"has_default_value": false,
 						"default_value": ""
+					},
+					{
+						"name": "modulate",
+						"type": "Color",
+						"has_default_value": true,
+						"default_value": "1,1,1,1"
+					},
+					{
+						"name": "transpose",
+						"type": "bool",
+						"has_default_value": true,
+						"default_value": "False"
+					},
+					{
+						"name": "normal_map",
+						"type": "Texture",
+						"has_default_value": true,
+						"default_value": "Null"
 					}
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "get_color",
 				"return_type": "Color",
+=======
+				"name": "draw_rect_region",
+				"return_type": "void",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
 				"is_const": true,
@@ -30065,6 +30587,7 @@
 				"is_from_script": false,
 				"arguments": [
 					{
+<<<<<<< HEAD
 						"name": "name",
 						"type": "String",
 						"has_default_value": false,
@@ -30144,12 +30667,145 @@
 						"type": "String",
 						"has_default_value": false,
 						"default_value": ""
+=======
+						"name": "canvas_item",
+						"type": "RID",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "rect",
+						"type": "Rect2",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "src_rect",
+						"type": "Rect2",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "modulate",
+						"type": "Color",
+						"has_default_value": true,
+						"default_value": "1,1,1,1"
+					},
+					{
+						"name": "transpose",
+						"type": "bool",
+						"has_default_value": true,
+						"default_value": "False"
+					},
+					{
+						"name": "normal_map",
+						"type": "Texture",
+						"has_default_value": true,
+						"default_value": "Null"
+					},
+					{
+						"name": "clip_uv",
+						"type": "bool",
+						"has_default_value": true,
+						"default_value": "True"
+>>>>>>> Progress on splitting up generated classes into their own packages
 					}
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "set_constant",
 				"return_type": "void",
+=======
+				"name": "get_data",
+				"return_type": "Image",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+				]
+			}
+		],
+		"enums": [
+			{
+				"name": "Flags",
+				"values": {
+					"FLAG_MIPMAPS": 1,
+					"FLAG_REPEAT": 2,
+					"FLAG_FILTER": 4,
+					"FLAGS_DEFAULT": 7,
+					"FLAG_ANISOTROPIC_FILTER": 8,
+					"FLAG_CONVERT_TO_LINEAR": 16,
+					"FLAG_MIRRORED_REPEAT": 32,
+					"FLAG_VIDEO_SURFACE": 4096
+				}
+			}
+		]
+	},
+	{
+		"name": "BitmapFont",
+		"base_class": "Font",
+		"api_type": "core",
+		"singleton": false,
+		"instanciable": true,
+		"is_reference": true,
+		"constants": {
+		},
+		"properties": [
+			{
+				"name": "textures",
+				"type": "Array",
+				"getter": "_get_textures",
+				"setter": "_set_textures"
+			},
+			{
+				"name": "chars",
+				"type": "PoolIntArray",
+				"getter": "_get_chars",
+				"setter": "_set_chars"
+			},
+			{
+				"name": "kernings",
+				"type": "PoolIntArray",
+				"getter": "_get_kernings",
+				"setter": "_set_kernings"
+			},
+			{
+				"name": "height",
+				"type": "float",
+				"getter": "get_height",
+				"setter": "set_height"
+			},
+			{
+				"name": "ascent",
+				"type": "float",
+				"getter": "get_ascent",
+				"setter": "set_ascent"
+			},
+			{
+				"name": "distance_field",
+				"type": "bool",
+				"getter": "is_distance_field_hint",
+				"setter": "set_distance_field_hint"
+			},
+			{
+				"name": "fallback",
+				"type": "BitmapFont",
+				"getter": "get_fallback",
+				"setter": "set_fallback"
+			}
+		],
+		"signals": [
+		],
+		"methods": [
+			{
+				"name": "create_from_fnt",
+				"return_type": "enum.Error",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
 				"is_const": false,
@@ -30159,6 +30815,7 @@
 				"is_from_script": false,
 				"arguments": [
 					{
+<<<<<<< HEAD
 						"name": "name",
 						"type": "String",
 						"has_default_value": false,
@@ -30173,14 +30830,23 @@
 					{
 						"name": "constant",
 						"type": "int",
+=======
+						"name": "path",
+						"type": "String",
+>>>>>>> Progress on splitting up generated classes into their own packages
 						"has_default_value": false,
 						"default_value": ""
 					}
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "get_constant",
 				"return_type": "int",
+=======
+				"name": "set_height",
+				"return_type": "void",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
 				"is_const": true,
@@ -30190,6 +30856,7 @@
 				"is_from_script": false,
 				"arguments": [
 					{
+<<<<<<< HEAD
 						"name": "name",
 						"type": "String",
 						"has_default_value": false,
@@ -30200,10 +30867,17 @@
 						"type": "String",
 						"has_default_value": false,
 						"default_value": ""
+=======
+						"name": "px",
+						"type": "float",
+						"has_default_value": false,
+						"default_value": ""
+>>>>>>> Progress on splitting up generated classes into their own packages
 					}
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "has_constant",
 				"return_type": "bool",
 				"is_editor": false,
@@ -30230,6 +30904,9 @@
 			},
 			{
 				"name": "clear_constant",
+=======
+				"name": "set_ascent",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"return_type": "void",
 				"is_editor": false,
 				"is_noscript": false,
@@ -30240,6 +30917,7 @@
 				"is_from_script": false,
 				"arguments": [
 					{
+<<<<<<< HEAD
 						"name": "name",
 						"type": "String",
 						"has_default_value": false,
@@ -30248,14 +30926,23 @@
 					{
 						"name": "type",
 						"type": "String",
+=======
+						"name": "px",
+						"type": "float",
+>>>>>>> Progress on splitting up generated classes into their own packages
 						"has_default_value": false,
 						"default_value": ""
 					}
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "get_constant_list",
 				"return_type": "PoolStringArray",
+=======
+				"name": "add_kerning_pair",
+				"return_type": "void",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
 				"is_const": true,
@@ -30265,6 +30952,7 @@
 				"is_from_script": false,
 				"arguments": [
 					{
+<<<<<<< HEAD
 						"name": "type",
 						"type": "String",
 						"has_default_value": false,
@@ -30286,27 +30974,35 @@
 					{
 						"name": "font",
 						"type": "Font",
+=======
+						"name": "char_a",
+						"type": "int",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "char_b",
+						"type": "int",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "kerning",
+						"type": "int",
+>>>>>>> Progress on splitting up generated classes into their own packages
 						"has_default_value": false,
 						"default_value": ""
 					}
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "get_default_font",
 				"return_type": "Font",
-				"is_editor": false,
-				"is_noscript": false,
-				"is_const": true,
-				"is_reverse": false,
-				"is_virtual": false,
-				"has_varargs": false,
-				"is_from_script": false,
-				"arguments": [
-				]
-			},
-			{
-				"name": "get_type_list",
-				"return_type": "PoolStringArray",
+=======
+				"name": "get_kerning_pair",
+				"return_type": "int",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
 				"is_const": true,
@@ -30316,15 +31012,54 @@
 				"is_from_script": false,
 				"arguments": [
 					{
-						"name": "type",
-						"type": "String",
+						"name": "char_a",
+						"type": "int",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "char_b",
+						"type": "int",
 						"has_default_value": false,
 						"default_value": ""
 					}
 				]
 			},
 			{
+<<<<<<< HEAD
+				"name": "get_type_list",
+				"return_type": "PoolStringArray",
+=======
+				"name": "add_texture",
+				"return_type": "void",
+>>>>>>> Progress on splitting up generated classes into their own packages
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+					{
+<<<<<<< HEAD
+						"name": "type",
+						"type": "String",
+=======
+						"name": "texture",
+						"type": "Texture",
+>>>>>>> Progress on splitting up generated classes into their own packages
+						"has_default_value": false,
+						"default_value": ""
+					}
+				]
+			},
+			{
+<<<<<<< HEAD
 				"name": "_emit_theme_changed",
+=======
+				"name": "add_char",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"return_type": "void",
 				"is_editor": false,
 				"is_noscript": false,
@@ -30334,20 +31069,59 @@
 				"has_varargs": false,
 				"is_from_script": false,
 				"arguments": [
+<<<<<<< HEAD
 				]
 			},
 			{
 				"name": "copy_default_theme",
 				"return_type": "void",
+=======
+					{
+						"name": "character",
+						"type": "int",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "texture",
+						"type": "int",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "rect",
+						"type": "Rect2",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "align",
+						"type": "Vector2",
+						"has_default_value": true,
+						"default_value": "(0, 0)"
+					},
+					{
+						"name": "advance",
+						"type": "float",
+						"has_default_value": true,
+						"default_value": "-1"
+					}
+				]
+			},
+			{
+				"name": "get_texture_count",
+				"return_type": "int",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
-				"is_const": false,
+				"is_const": true,
 				"is_reverse": false,
 				"is_virtual": false,
 				"has_varargs": false,
 				"is_from_script": false,
 				"arguments": [
 				]
+<<<<<<< HEAD
 			}
 		],
 		"enums": [
@@ -30370,6 +31144,12 @@
 			{
 				"name": "draw",
 				"return_type": "void",
+=======
+			},
+			{
+				"name": "get_texture",
+				"return_type": "Texture",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
 				"is_const": true,
@@ -30379,6 +31159,7 @@
 				"is_from_script": false,
 				"arguments": [
 					{
+<<<<<<< HEAD
 						"name": "canvas_item",
 						"type": "RID",
 						"has_default_value": false,
@@ -30407,64 +31188,23 @@
 						"type": "int",
 						"has_default_value": true,
 						"default_value": "-1"
+=======
+						"name": "idx",
+						"type": "int",
+						"has_default_value": false,
+						"default_value": ""
+>>>>>>> Progress on splitting up generated classes into their own packages
 					}
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "get_ascent",
 				"return_type": "float",
-				"is_editor": false,
-				"is_noscript": false,
-				"is_const": true,
-				"is_reverse": false,
-				"is_virtual": false,
-				"has_varargs": false,
-				"is_from_script": false,
-				"arguments": [
-				]
-			},
-			{
-				"name": "get_descent",
-				"return_type": "float",
-				"is_editor": false,
-				"is_noscript": false,
-				"is_const": true,
-				"is_reverse": false,
-				"is_virtual": false,
-				"has_varargs": false,
-				"is_from_script": false,
-				"arguments": [
-				]
-			},
-			{
-				"name": "get_height",
-				"return_type": "float",
-				"is_editor": false,
-				"is_noscript": false,
-				"is_const": true,
-				"is_reverse": false,
-				"is_virtual": false,
-				"has_varargs": false,
-				"is_from_script": false,
-				"arguments": [
-				]
-			},
-			{
-				"name": "is_distance_field_hint",
-				"return_type": "bool",
-				"is_editor": false,
-				"is_noscript": false,
-				"is_const": true,
-				"is_reverse": false,
-				"is_virtual": false,
-				"has_varargs": false,
-				"is_from_script": false,
-				"arguments": [
-				]
-			},
-			{
-				"name": "get_string_size",
+=======
+				"name": "get_char_size",
 				"return_type": "Vector2",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
 				"is_const": true,
@@ -30474,25 +31214,158 @@
 				"is_from_script": false,
 				"arguments": [
 					{
-						"name": "string",
-						"type": "String",
+						"name": "char",
+						"type": "int",
+						"has_default_value": false,
+						"default_value": ""
+					},
+					{
+						"name": "next",
+						"type": "int",
+						"has_default_value": true,
+						"default_value": "0"
+					}
+				]
+			},
+			{
+<<<<<<< HEAD
+				"name": "get_descent",
+				"return_type": "float",
+=======
+				"name": "set_distance_field_hint",
+				"return_type": "void",
+>>>>>>> Progress on splitting up generated classes into their own packages
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": false,
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+					{
+						"name": "enable",
+						"type": "bool",
 						"has_default_value": false,
 						"default_value": ""
 					}
 				]
 			},
 			{
-				"name": "draw_char",
+<<<<<<< HEAD
+				"name": "get_height",
 				"return_type": "float",
+=======
+				"name": "clear",
+				"return_type": "void",
+>>>>>>> Progress on splitting up generated classes into their own packages
 				"is_editor": false,
 				"is_noscript": false,
-				"is_const": true,
+				"is_const": false,
 				"is_reverse": false,
 				"is_virtual": false,
 				"has_varargs": false,
 				"is_from_script": false,
 				"arguments": [
+				]
+			},
+			{
+<<<<<<< HEAD
+				"name": "is_distance_field_hint",
+				"return_type": "bool",
+=======
+				"name": "_set_chars",
+				"return_type": "void",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": false,
+				"is_reverse": false,
+				"is_virtual": true,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
 					{
+						"name": "arg0",
+						"type": "PoolIntArray",
+						"has_default_value": false,
+						"default_value": ""
+					}
+				]
+			},
+			{
+				"name": "_get_chars",
+				"return_type": "PoolIntArray",
+>>>>>>> Progress on splitting up generated classes into their own packages
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": true,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+				]
+			},
+			{
+<<<<<<< HEAD
+				"name": "get_string_size",
+				"return_type": "Vector2",
+=======
+				"name": "_set_kernings",
+				"return_type": "void",
+>>>>>>> Progress on splitting up generated classes into their own packages
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": false,
+				"is_reverse": false,
+				"is_virtual": true,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+					{
+<<<<<<< HEAD
+						"name": "string",
+						"type": "String",
+=======
+						"name": "arg0",
+						"type": "PoolIntArray",
+>>>>>>> Progress on splitting up generated classes into their own packages
+						"has_default_value": false,
+						"default_value": ""
+					}
+				]
+			},
+			{
+<<<<<<< HEAD
+				"name": "draw_char",
+				"return_type": "float",
+=======
+				"name": "_get_kernings",
+				"return_type": "PoolIntArray",
+>>>>>>> Progress on splitting up generated classes into their own packages
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": true,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+				]
+			},
+			{
+				"name": "_set_textures",
+				"return_type": "void",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": false,
+				"is_reverse": false,
+				"is_virtual": true,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+					{
+<<<<<<< HEAD
 						"name": "canvas_item",
 						"type": "RID",
 						"has_default_value": false,
@@ -30521,11 +31394,37 @@
 						"type": "Color",
 						"has_default_value": true,
 						"default_value": "1,1,1,1"
+=======
+						"name": "arg0",
+						"type": "Array",
+						"has_default_value": false,
+						"default_value": ""
+>>>>>>> Progress on splitting up generated classes into their own packages
 					}
 				]
 			},
 			{
+<<<<<<< HEAD
 				"name": "update_changes",
+				"return_type": "void",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": false,
+=======
+				"name": "_get_textures",
+				"return_type": "Array",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+				"is_reverse": false,
+				"is_virtual": true,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
+				]
+			},
+			{
+				"name": "set_fallback",
 				"return_type": "void",
 				"is_editor": false,
 				"is_noscript": false,
@@ -30535,10 +31434,51 @@
 				"has_varargs": false,
 				"is_from_script": false,
 				"arguments": [
+					{
+						"name": "fallback",
+						"type": "BitmapFont",
+						"has_default_value": false,
+						"default_value": ""
+					}
+				]
+			},
+			{
+				"name": "get_fallback",
+				"return_type": "BitmapFont",
+				"is_editor": false,
+				"is_noscript": false,
+				"is_const": true,
+>>>>>>> Progress on splitting up generated classes into their own packages
+				"is_reverse": false,
+				"is_virtual": false,
+				"has_varargs": false,
+				"is_from_script": false,
+				"arguments": [
 				]
 			}
 		],
 		"enums": [
+<<<<<<< HEAD
+=======
+		]
+	},
+	{
+		"name": "Panel",
+		"base_class": "Control",
+		"api_type": "core",
+		"singleton": false,
+		"instanciable": true,
+		"is_reference": false,
+		"constants": {
+		},
+		"properties": [
+		],
+		"signals": [
+		],
+		"methods": [
+		],
+		"enums": [
+>>>>>>> Progress on splitting up generated classes into their own packages
 		]
 	},
 	{
@@ -31261,7 +32201,28 @@
 						"default_value": ""
 					}
 				]
+<<<<<<< HEAD
 			},
+=======
+			}
+		],
+		"enums": [
+		]
+	},
+	{
+		"name": "Button",
+		"base_class": "BaseButton",
+		"api_type": "core",
+		"singleton": false,
+		"instanciable": true,
+		"is_reference": false,
+		"constants": {
+			"ALIGN_LEFT": 0,
+			"ALIGN_CENTER": 1,
+			"ALIGN_RIGHT": 2
+		},
+		"properties": [
+>>>>>>> Progress on splitting up generated classes into their own packages
 			{
 				"name": "_cursor_changed_emit",
 				"return_type": "void",

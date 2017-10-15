@@ -9,7 +9,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -127,6 +126,7 @@ type View struct {
 	APIs         []GDAPI
 	Header       string
 	ClassDocs    map[string]string
+	CurrentAPI   int // The index of view.APIs that we're on
 	MethodDocs   map[string]map[string]string
 	SingletonMap map[string]bool
 }
@@ -199,6 +199,8 @@ func (v View) GoArgName(argString string) string {
 		return "aDefault"
 	case "var":
 		return "variable"
+	case "range":
+		return "aRange"
 	case "func":
 		return "function"
 	case "return":
@@ -270,6 +272,31 @@ func (v View) SetClassName(classString string, singleton bool) string {
 func (v View) SetBaseClassName(baseClass string) string {
 	return v.SetClassName(baseClass, v.SingletonMap[baseClass])
 }
+
+func (v View) SetPkgBaseClassName(baseClass string) string {
+	classString := v.LowerName(v.SetBaseClassName(baseClass))
+	switch classString {
+	case "type":
+		return "types"
+	case "default":
+		return "default"
+	case "var":
+		return "variable"
+	case "range":
+		return "ranges"
+	case "func":
+		return "function"
+	case "return":
+		return "returns"
+	}
+
+	return classString
+}
+
+func (v View) LowerName(name string) string {
+	return strings.ToLower(name)
+}
+
 func main() {
 
 	// Get the basepath so we know where to look for our JSON API and template file.
@@ -280,6 +307,10 @@ func main() {
 	docsPath := os.Getenv("GODOT_DOC_PATH")
 	if docsPath == "" {
 		panic("$GODOT_DOC_PATH environment variable was not set. Be sure to run this from generate.sh!")
+	}
+	pkgPath := os.Getenv("PKG_PATH")
+	if pkgPath == "" {
+		panic("$PKG_PATH environment variable was not set. Be sure to run this from generate.sh!")
 	}
 
 	// Get our documentation that was pulled down from generate.sh.
@@ -325,7 +356,7 @@ func main() {
 //
 //   Changes to this file may cause incorrect behavior and will be lost if
 //   the code is regenerated. Any updates should be done in
-//   "templates/classes.go.template" so they can be included in the generated
+//   "templates/*.go.template" so they can be included in the generated
 //   code.
 //------------------------------------------------------------------------------
 `
@@ -348,21 +379,71 @@ func main() {
 		sort.Sort(BySignalName(api.Signals))
 	}
 
-	// List out template file
-	templateFile := templatePath + "/classes.go.template"
-
-	// Create a template from our template file.
-	t, err := template.ParseFiles(templateFile)
+	// First, generate our conversion functions.
+	outputDir := pkgPath + "/godot/classes/class"
+	outputFile := outputDir + "/convert.go"
+	log.Println("Generating", outputFile)
+	err = os.MkdirAll(outputDir, 0755)
+	if err != nil {
+		log.Fatal("Error creating class directory:", err)
+	}
+	convertTemplateFile := templatePath + "/convert.go.template"
+	t, err := template.ParseFiles(convertTemplateFile)
 	if err != nil {
 		log.Fatal("Error parsing template:", err)
 	}
 	templateBuffer := bytes.NewBufferString("")
 	err = t.Execute(templateBuffer, view)
 	if err != nil {
-		log.Fatal("Unable to apply template:", err)
+		log.Fatal("Unable to apply template to", outputFile, ":", err)
+	}
+	err = ioutil.WriteFile(outputFile, templateBuffer.Bytes(), 0644)
+	if err != nil {
+		log.Fatal("Unable to write out convert.go:", err)
 	}
 
-	// Output our template to STDOUT
-	fmt.Println(templateBuffer.String())
+	// Loop through all of the Godot APIs and generate the Go bindings
+	// for them.
+	for i, api := range view.APIs {
+		// Only generate valid classes
+		if !view.IsValidClass(api.Name, api.BaseClass) {
+			continue
+		}
 
+		// Set the view's index so we can know which class to write
+		// in the template.log
+		view.CurrentAPI = i
+
+		// Get the package name from the API's name
+		pkgName := view.SetPkgBaseClassName(api.Name)
+		outputDir := pkgPath + "/godot/classes/" + pkgName
+		outputFile := outputDir + "/" + pkgName + ".go"
+		log.Println("Generating", outputFile, "...")
+
+		// Create the package directory if it doesn't exist.
+		err = os.MkdirAll(outputDir, 0755)
+		if err != nil {
+			log.Fatal("Error creating class directory:", err)
+		}
+
+		// Get our template file
+		templateFile := templatePath + "/class.go.template"
+
+		// Create a template from our template file.
+		t, err := template.ParseFiles(templateFile)
+		if err != nil {
+			log.Fatal("Error parsing template:", err)
+		}
+		templateBuffer := bytes.NewBufferString("")
+		err = t.Execute(templateBuffer, view)
+		if err != nil {
+			log.Fatal("Unable to apply template:", err)
+		}
+
+		// Output our template to a file
+		err = ioutil.WriteFile(outputFile, templateBuffer.Bytes(), 0644)
+		if err != nil {
+			log.Fatal("Unable to write out template:", err)
+		}
+	}
 }
