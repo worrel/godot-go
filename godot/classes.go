@@ -12,8 +12,11 @@ package godot
 /*
 #include <stdio.h>
 #include <stdlib.h>
+#include <gdnative_api_struct.gen.h>
 #include <gdnative/gdnative.h>
 #include <nativescript/godot_nativescript.h>
+
+const extern godot_gdnative_core_api_struct *api;
 
 void **build_array(int length);
 void **build_array(int length) {
@@ -32,6 +35,130 @@ void add_element(void **array, void *element, int index) {
     array[index] = element;
 	printf("CGO: Index %i %p\n", index, element);
 	printf("CGO: Array %p %p %p %p %p\n", &array, array, &array[index], *array, array[index]);
+}
+
+godot_object *get_node_c1(godot_object*,char*,char*,char*);
+godot_object *get_node_c1(godot_object *instance, char *class_name, char *method_name, char *node_name) {
+	printf("CGO: in get_node_c1: %p, %s, %s, %s\n", instance, class_name, method_name, node_name);
+	
+	static godot_method_bind *mb = NULL;
+	if (!mb) {
+		mb = api->godot_method_bind_get_method(class_name, method_name);
+	}
+	printf("CGO: get_node_c1 got method_bind %p\n", mb);
+
+	godot_object *obj;
+	godot_node_path np;
+	{
+		godot_string name;
+		api->godot_string_new(&name);
+		api->godot_string_parse_utf8(&name, node_name);
+		api->godot_node_path_new(&np, &name);
+		api->godot_string_destroy(&name);
+	}
+	const void *c_args[] = {
+		&np
+	};
+
+	printf("CGO: get_node_c1 about to call Godot\n");
+	api->godot_method_bind_ptrcall(mb, instance, c_args, &obj);
+	printf("CGO: get_node_c1 done calling Godot\n");
+	
+	api->godot_node_path_destroy(&np);
+
+	printf("CGO: get_node_c1 done!\n");
+	return obj;
+}
+
+godot_object *get_node_c2(godot_object*,char*);
+godot_object *get_node_c2(godot_object *instance, char *node_name) {
+	printf("CGO: in get_node_c2: %p, %s\n", instance, node_name);
+	
+	char *class_name = "Node";
+	char *method_name = "get_node";
+
+	static godot_method_bind *mb = NULL;
+	if (!mb) {
+		mb = api->godot_method_bind_get_method(class_name, method_name);
+	}
+	printf("CGO: get_node_c2 got method_bind %p\n", mb);
+
+	godot_object *obj;
+	godot_node_path np;
+	{
+		godot_string name;
+		api->godot_string_new(&name);
+		api->godot_string_parse_utf8(&name, node_name);
+		api->godot_node_path_new(&np, &name);
+		api->godot_string_destroy(&name);
+	}
+	const void *c_args[] = {
+		&np
+	};
+
+	printf("CGO: get_node_c2 about to call Godot\n");
+	api->godot_method_bind_ptrcall(mb, instance, c_args, &obj);
+	printf("CGO: get_node_c2 done calling Godot\n");
+	
+	api->godot_node_path_destroy(&np);
+
+	printf("CGO: get_node_c2 done!\n");
+	return obj;
+}
+
+void set_animation_c1(godot_object*, char*, char*, char*);
+void set_animation_c1(godot_object *instance, char* class_name, char* method_name, char *anim_name) {
+	printf("CGO: in set_animation_c1: %p, %s, %s, %s\n", instance, class_name, method_name, anim_name);
+	
+	static godot_method_bind *mb = NULL;
+	if (!mb) {
+		mb = api->godot_method_bind_get_method(class_name, method_name);
+	}
+	printf("CGO: set_animation_c1 got method_bind %p\n", mb);
+
+	godot_string name;
+	api->godot_string_new(&name);
+	api->godot_string_parse_utf8(&name, anim_name);
+
+	const void *c_args[] = {
+		&name
+	};
+
+	printf("CGO: set_animation_c1 about to call Godot\n");
+	api->godot_method_bind_ptrcall(mb, instance, c_args, NULL);
+	printf("CGO: set_animation_c1 done calling Godot\n");
+
+	api->godot_string_destroy(&name);
+	printf("CGO: set_animation_c1 done!\n");
+}
+
+void set_animation_c2(godot_object*, char*);
+void set_animation_c2(godot_object *instance, char *anim_name) {
+	printf("CGO: in set_animation_c2: %p, %s\n", instance, anim_name);
+	
+	char *class_name = "AnimatedSprite";
+	char *method_name = "set_animation";
+
+	static godot_method_bind *mb = NULL;
+	if (!mb) {
+		mb = api->godot_method_bind_get_method(class_name, method_name);
+	}
+	printf("CGO: set_animation_c2 got method_bind %p\n", mb);
+
+	godot_string name;
+	api->godot_string_new(&name);
+	api->godot_string_parse_utf8(&name, anim_name);
+
+	const void *c_args[] = {
+		&name
+	};
+
+	printf("CGO: set_animation_c2 about to call Godot\n");
+	api->godot_method_bind_ptrcall(mb, instance, c_args, NULL);
+	printf("CGO: set_animation_c2 done calling Godot\n");
+
+	api->godot_string_destroy(&name);
+	printf("CGO: set_animation_c2 done!\n");
 }
 */
 import "C"
@@ -2264,6 +2391,36 @@ func (o *AnimatedSprite) SetAnimation(animation string) {
 
 	o.callParentMethod(o.baseClass(), "set_animation", goArguments, "")
 
+	log.Println("  Function successfully completed.")
+
+}
+
+func (o *AnimatedSprite) SetAnimationC1(animation string) {
+	log.Println("Calling AnimatedSprite.SetAnimationC1()")
+
+	instance := unsafe.Pointer(o.getOwner())
+	anim_name := C.CString(animation)
+	defer C.free(unsafe.Pointer(anim_name))
+	class_name := C.CString(o.baseClass())
+	defer C.free(unsafe.Pointer(class_name))
+	method_name := C.CString("get_node")
+	defer C.free(unsafe.Pointer(method_name))
+
+	log.Println("  About to call")
+	C.set_animation_c1(instance, class_name, method_name, anim_name)
+	log.Println("  Function successfully completed.")
+
+}
+
+func (o *AnimatedSprite) SetAnimationC2(animation string) {
+	log.Println("Calling AnimatedSprite.SetAnimationC2()")
+
+	instance := unsafe.Pointer(o.getOwner())
+	anim_name := C.CString(animation)
+	defer C.free(unsafe.Pointer(anim_name))
+
+	log.Println("  About to call")
+	C.set_animation_c2(instance, anim_name)
 	log.Println("  Function successfully completed.")
 
 }
@@ -16002,7 +16159,7 @@ type ButtonImplementer interface {
 }
 
 /*
-   Group of [Button]. All direct and indirect children buttons become radios. Only one allows being pressed.
+   Group of [Button]. All direct and indirect children buttons become radios. Only one allows being pressed. [member BaseButton.toggle_mode] should be [code]true[/code].
 */
 type ButtonGroup struct {
 	Resource
@@ -22347,7 +22504,7 @@ type ConeTwistJointImplementer interface {
 }
 
 /*
-   This helper class can be used to store [Variant] values on the filesystem using INI-style formatting. The stored values are indentified by a section and a key: [codeblock] [section] some_key=42 string_example="Hello World!" a_vector=Vector3( 1, 0, 2 ) [/codeblock] The stored data can be saved to or parsed from a file, though ConfigFile objects can also be used directly without accessing the filesystem. The following example shows how to parse an INI-style file from the system, read its contents and store new values in it: [codeblock] var config = ConfigFile.new() var err = config.load("user://settings.cfg") if err == OK: # if not, something went wrong with the file loading # Look for the display/width pair, and default to 1024 if missing var screen_width = get_value("display", "width", 1024) # Store a variable if and only if it hasn't been defined yet if not config.has_section_key("audio", "mute"): config.set_value("audio", "mute", false) # Save the changes by overwriting the previous file config.save("user://settings.cfg") [/codeblock]
+   This helper class can be used to store [Variant] values on the filesystem using INI-style formatting. The stored values are identified by a section and a key: [codeblock] [section] some_key=42 string_example="Hello World!" a_vector=Vector3( 1, 0, 2 ) [/codeblock] The stored data can be saved to or parsed from a file, though ConfigFile objects can also be used directly without accessing the filesystem. The following example shows how to parse an INI-style file from the system, read its contents and store new values in it: [codeblock] var config = ConfigFile.new() var err = config.load("user://settings.cfg") if err == OK: # if not, something went wrong with the file loading # Look for the display/width pair, and default to 1024 if missing var screen_width = get_value("display", "width", 1024) # Store a variable if and only if it hasn't been defined yet if not config.has_section_key("audio", "mute"): config.set_value("audio", "mute", false) # Save the changes by overwriting the previous file config.save("user://settings.cfg") [/codeblock]
 */
 type ConfigFile struct {
 	Reference
@@ -50667,7 +50824,7 @@ func (o *Line2D) SetJointMode(mode int64) {
 }
 
 /*
-   Overwites the position in point [code]i[/code] with the supplied [code]position[/code].
+   Overwrites the position in point [code]i[/code] with the supplied [code]position[/code].
 */
 func (o *Line2D) SetPointPosition(i int64, position *Vector2) {
 	log.Println("Calling Line2D.SetPointPosition()")
@@ -57282,6 +57439,46 @@ func (o *Node) GetNode(path *NodePath) *Node {
 	log.Println("  Got return value: ", returnValue)
 	return returnValue
 
+}
+
+func (o *Node) GetNodeC1(path *NodePath) *Node {
+	log.Println("Calling Node.GetNodeC1()")
+
+	instance := unsafe.Pointer(o.getOwner())
+	node_path := C.CString(path.AsString())
+	defer C.free(unsafe.Pointer(node_path))
+	class_name := C.CString(o.baseClass())
+	defer C.free(unsafe.Pointer(class_name))
+	method_name := C.CString("get_node")
+	defer C.free(unsafe.Pointer(method_name))
+
+	log.Println("  About to call")
+	gNode := C.get_node_c1(instance, class_name, method_name, node_path)
+	log.Println("  Function successfully completed.")
+
+
+	log.Println("  Got return value: ", gNode)
+	node := Node{}
+	node.owner = (*C.godot_object)(gNode)
+	return &node
+}
+
+func (o *Node) GetNodeC2(path *NodePath) *Node {
+	log.Println("Calling Node.GetNodeC2()")
+
+	instance := unsafe.Pointer(o.getOwner())
+	node_path := C.CString(path.AsString())
+	defer C.free(unsafe.Pointer(node_path))
+
+	log.Println("  About to call")
+	gNode := C.get_node_c2(instance, node_path)
+	log.Println("  Function successfully completed.")
+
+
+	log.Println("  Got return value: ", gNode)
+	node := Node{}
+	node.owner = (*C.godot_object)(gNode)
+	return &node
 }
 
 /*
@@ -80393,7 +80590,7 @@ type RichTextLabelImplementer interface {
 }
 
 /*
-   This is the node that implements full 3D physics. This means that you do not control a RigidBody directly. Instead you can apply forces to it (gravity, impulses, etc.), and the physics simulation will calculate the resulting movement, collision, bouncing, rotating, etc. This node can use custom force integration, for writing complex physics motion behavior per node. This node can shift state between regular Rigid body, Kinematic, Character or Static. Character mode forbids this node from being rotated. As a warning, don't change RigidBody's position every frame or very often. Sporadic changes work fine, but physics runs at a different granularity (fixed hz) than usual rendering (process callback) and maybe even in a separate thread, so changing this from a process loop will yield strange behavior.
+   This is the node that implements full 3D physics. This means that you do not control a RigidBody directly. Instead you can apply forces to it (gravity, impulses, etc.), and the physics simulation will calculate the resulting movement, collision, bouncing, rotating, etc. A RigidBody has 4 behavior [member mode]s: Rigid, Static, Character, and Kinematic. [b]Note:[/b] Don't change a RigidBody's position every frame or very often. Sporadic changes work fine, but physics runs at a different granularity (fixed hz) than usual rendering (process callback) and maybe even in a separate thread, so changing this from a process loop will yield strange behavior. If you need to directly affect the body's state, use [method _integrate_forces], which allows you to directly access the physics state. If you need to override the default physics behavior, you can write a custom force integration. See [member custom_integrator].
 */
 type RigidBody struct {
 	PhysicsBody
@@ -81188,7 +81385,7 @@ type RigidBodyImplementer interface {
 }
 
 /*
-   This node implements simulated 2D physics. You do not control a RigidBody2D directly. Instead you apply forces to it (gravity, impulses, etc.) and the physics simulation calculates the resulting movement based on its mass, friction, and other physical properties. A RigidBody2D has 4 behavior modes (see [member mode]): - [b]Rigid[/b]: The body behaves as a physical object. It collides with other bodies and responds to forces applied to it. This is the default mode. - [b]Static[/b]: The body behaves like a [StaticBody2D] and does not move. - [b]Character[/b]: Similar to [code]Rigid[/code] mode, but the body can not rotate. - [b]Kinematic[/b]: The body behaves like a [KinematicBody2D], and must be moved by code. [b]Note:[/b] You should not change a RigidBody2D's [code]position[/code] or [code]linear_velocity[/code] every frame or even very often. If you need to directly affect the body's state, use [method _integrate_forces], which allows you to directly access the physics state. If you need to override the default physics behavior, you can write a custom force integration. See [member custom_integrator].
+   This node implements simulated 2D physics. You do not control a RigidBody2D directly. Instead you apply forces to it (gravity, impulses, etc.) and the physics simulation calculates the resulting movement based on its mass, friction, and other physical properties. A RigidBody2D has 4 behavior [member mode]s: Rigid, Static, Character, and Kinematic. [b]Note:[/b] You should not change a RigidBody2D's [code]position[/code] or [code]linear_velocity[/code] every frame or even very often. If you need to directly affect the body's state, use [method _integrate_forces], which allows you to directly access the physics state. If you need to override the default physics behavior, you can write a custom force integration. See [member custom_integrator].
 */
 type RigidBody2D struct {
 	PhysicsBody2D
@@ -105322,8 +105519,8 @@ type VSplitContainerImplementer interface {
 }
 
 /*
-
- */
+   This nodes implements all the physics logic needed to simulate a car. It is based on the raycast vehicle system commonly found in physics engines. You will need to add a [CollisionShape] for the main body of your vehicle and add [VehicleWheel] nodes for the wheels. You should also add a [MeshInstance] to this node for the 3D model of your car but this model should not include meshes for the wheels. You should control the vehicle by using the [member brake], [member engine_force], and [member steering] properties and not change the position or orientation of this node directly. Note that the origin point of your VehicleBody will determine the center of gravity of your vehicle so it is better to keep this low and move the [CollisionShape] and [MeshInstance] upwards.
+*/
 type VehicleBody struct {
 	RigidBody
 }
@@ -105454,8 +105651,8 @@ type VehicleBodyImplementer interface {
 }
 
 /*
-
- */
+   This node needs to be used as a child node of [VehicleBody] and simulates the behaviour of one of its wheels. This node also acts as a collider to detect if the wheel is touching a surface.
+*/
 type VehicleWheel struct {
 	Spatial
 }
@@ -105565,8 +105762,8 @@ func (o *VehicleWheel) GetRollInfluence() float64 {
 }
 
 /*
-
- */
+   Returns a value between 0.0 and 1.0 that indicates whether this wheel is skidding. 0.0 is not skidding, 1.0 means the wheel has lost grip.
+*/
 func (o *VehicleWheel) GetSkidinfo() float64 {
 	log.Println("Calling VehicleWheel.GetSkidinfo()")
 
@@ -105665,8 +105862,8 @@ func (o *VehicleWheel) GetSuspensionTravel() float64 {
 }
 
 /*
-
- */
+   Returns true if this wheel is in contact with a surface.
+*/
 func (o *VehicleWheel) IsInContact() bool {
 	log.Println("Calling VehicleWheel.IsInContact()")
 
@@ -107331,7 +107528,7 @@ func (o *Viewport) IsSizeOverrideEnabled() bool {
 }
 
 /*
-   Get the enabled status of the size strech override set with [method set_size_override_stretch].
+   Get the enabled status of the size stretch override set with [method set_size_override_stretch].
 */
 func (o *Viewport) IsSizeOverrideStretchEnabled() bool {
 	log.Println("Calling Viewport.IsSizeOverrideStretchEnabled()")
@@ -114944,7 +115141,7 @@ func (o *visualServer) ForceDraw(swapBuffers bool) {
 }
 
 /*
-   Syncronizes threads.
+   Synchronizes threads.
 */
 func (o *visualServer) ForceSync() {
 	log.Println("Calling VisualServer.ForceSync()")
