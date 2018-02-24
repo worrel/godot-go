@@ -1,0 +1,43 @@
+{{ $view := . -}}
+
+func {{ $view.GodotCallDefGo }} {
+
+    {{ range $i, $arg := .Arguments -}}
+    {{ if eq "String" $arg.Type -}}
+    cArg{{$i}} := C.CString({{$arg.Name}})
+    defer C.free(unsafe.Pointer(cArg{{$i}}))
+    {{ else -}}
+    cArg{{$i}} := {{ template "go2godot.go.template" $arg}}
+    {{end -}}
+    {{ end }}
+	{{ if $view.Debug -}}
+    log.Println("  Calling {{$view.GodotCallNameC}}...")
+    {{end -}}
+	{{ if ne .ReturnType "void" -}}
+    cRet := {{end}}C.{{$view.GodotCallNameC}}(
+        unsafe.Pointer(o.getOwner()),
+        getGodotMethod(o.baseClass(), methodName),
+        {{ range $i, $arg := .Arguments -}}
+        cArg{{ $i }},
+        {{- end }}
+	)
+    {{ if $view.Debug -}}
+    log.Println("  ...{{$view.GodotCallNameC}} returned")
+    {{end -}}
+    {{ if ne .ReturnType "void" -}}
+    {{ if .IsPrimitive .ReturnType -}}
+    ret := cRet
+    return {{ template "godot2go.go.template" $view.GetReturnType }}
+    {{ else -}}
+    {{ if eq .ReturnType "String" -}}
+    return C.GoString(cRet)
+    {{ else -}}
+    if cRet == nil {
+        return nil
+    }
+    ret := (*C.{{$view.GetReturnType}})(cRet)
+    return {{ template "godot2go.go.template" $view.GetReturnType }}
+    {{end -}}
+    {{end -}}
+    {{- end}}
+}

@@ -284,6 +284,10 @@ func (v View) IsClassType(t string) bool {
 	return isClassType(t) && !isEnum(t)
 }
 
+func (v View) CoreTypeMap() map[string]string {
+	return coreTypesGo2Godot
+}
+
 func (v View) GodotCall(method GDMethod) string {
 	var args []string
 	for _, arg := range method.Arguments {
@@ -316,7 +320,7 @@ func (v View) GodotCall(method GDMethod) string {
 		sig = GodotCallSignature{icallRetType, godotArgs, v.Debug}
 		v.GodotCalls[sigKey] = sig
 	}
-	icallName := sig.GodotCallName()
+	icallName := sig.GodotCallNameGo()
 	return fmt.Sprintf("%s(%s)", icallName, strings.Join(argNames, ","))
 }
 
@@ -430,20 +434,14 @@ func main() {
 	templateBuffer.Reset()
 	err = t.ExecuteTemplate(templateBuffer, "godotcalls.go.template", view)
 	if err != nil {
-		log.Fatal("Unable to apply godotcalls template:", err)
+		log.Fatal("Unable to apply godotcalls.go template:", err)
 	}
 
-	godotCallsOutputFile := filepath.Join(pkgPath, "godot", "godotcalls.go")
+	godotCallsGoOutputFile := filepath.Join(pkgPath, "godot", "godotcalls.go")
 	// Output our template to file
-	if err := ioutil.WriteFile(godotCallsOutputFile, templateBuffer.Bytes(), 0644); err != nil {
-		log.Fatalf("Unable to write %s: %s", godotCallsOutputFile, err)
+	if err := ioutil.WriteFile(godotCallsGoOutputFile, templateBuffer.Bytes(), 0644); err != nil {
+		log.Fatalf("Unable to write %s: %s", godotCallsGoOutputFile, err)
 	}
-
-	// iCalls := make(map[GodotCallSigKey]struct{})
-	// usedClasses := getUsedClasses(view.APIs[2])
-
-	// fmt.Fprintln(os.Stderr, generateClassImplementation(iCalls, usedClasses, view.ClassMap, view.APIs[2]))
-	// fmt.Fprintln(os.Stderr, generateICallImplementation(iCalls))
 
 }
 
@@ -464,11 +462,19 @@ type GodotCallArg struct {
 	IsPrimitive bool
 }
 
-func (gcs GodotCallSignature) GetReturnType() string {
-	return returnType(gcs.ReturnType)
+func (gcs GodotCallSignature) IsCoreType(t string) bool {
+	return isCoreType(t)
 }
 
-func (gcs GodotCallSignature) GodotCallName() string {
+func (gcs GodotCallSignature) IsPrimitive(t string) bool {
+	return isPrimitive(t)
+}
+
+func (gcs GodotCallSignature) GetReturnType() string {
+	return gdNativeType(gcs.ReturnType)
+}
+
+func (gcs GodotCallSignature) GodotCallNameGo() string {
 	nameParts := []string{fmt.Sprintf("godotCall_%s", stripName(gcs.ReturnType))}
 	for _, arg := range gcs.Arguments {
 		nameParts = append(nameParts, stripName(arg.Type))
@@ -476,12 +482,28 @@ func (gcs GodotCallSignature) GodotCallName() string {
 	return casee.ToCamelCase(strings.Join(nameParts, "_"))
 }
 
-func (gcs GodotCallSignature) GodotCallDef() string {
+func (gcs GodotCallSignature) GodotCallNameC() string {
+	nameParts := []string{fmt.Sprintf("godot_call_%s", stripName(gcs.ReturnType))}
+	for _, arg := range gcs.Arguments {
+		nameParts = append(nameParts, stripName(arg.Type))
+	}
+	return strings.ToLower(strings.Join(nameParts, "_"))
+}
+
+func (gcs GodotCallSignature) GodotCallDefGo() string {
 	params := []string{"o Class, methodName string"}
 	for _, arg := range gcs.Arguments {
 		params = append(params, fmt.Sprintf("%s %s", arg.Name, GetGoValue(arg.Type)))
 	}
-	return fmt.Sprintf("%s(%s) %s", gcs.GodotCallName(), strings.Join(params, ","), GetGoValue(gcs.ReturnType))
+	return fmt.Sprintf("%s(%s) %s", gcs.GodotCallNameGo(), strings.Join(params, ","), GetGoValue(gcs.ReturnType))
+}
+
+func (gcs GodotCallSignature) GodotCallDefC() string {
+	params := []string{"godot_object *instance, godot_method_bind *mb"}
+	for _, arg := range gcs.Arguments {
+		params = append(params, fmt.Sprintf("%s%s", cType(arg.Type), arg.Name))
+	}
+	return fmt.Sprintf("%s%s(%s)", cType(gcs.ReturnType), gcs.GodotCallNameC(), strings.Join(params, ","))
 }
 
 var setMember struct{}
@@ -697,21 +719,38 @@ func generateClassImplementation(
 	return strings.Join(source, "\n")
 }
 
-func returnType(t string) string {
+func cType(t string) string {
 	if isClassType(t) {
-		return "C.godot_object"
+		return "godot_object *"
 	}
 
+	if t == "String" {
+		return "char *"
+	}
+
+	coreType, found := coreTypesGo2Godot[t]
+	if found {
+		return coreType + " *"
+	}
+
+	return t + " "
+}
+
+func gdNativeType(t string) string {
 	if t == "int" {
-		return "C.godot_int"
+		return "godot_int"
 	}
 
 	if t == "float" || t == "real" {
-		return "C.godot_real"
+		return "godot_real"
 	}
 
 	if t == "bool" {
-		return "C.godot_bool"
+		return "godot_bool"
+	}
+
+	if isClassType(t) {
+		return "godot_object"
 	}
 
 	coreType, found := coreTypesGo2Godot[t]
@@ -806,30 +845,30 @@ func isClassType(name string) bool {
 }
 
 var coreTypesGo2Godot = map[string]string{
-	"Array":            "C.godot_array",
-	"Basis":            "C.godot_basis",
-	"Color":            "C.godot_color",
-	"Dictionary":       "C.godot_dictionary",
-	"Error":            "C.godot_error",
-	"NodePath":         "C.godot_node_path",
-	"Plane":            "C.godot_plane",
-	"PoolByteArray":    "C.godot_pool_byte_array",
-	"PoolIntArray":     "C.godot_pool_int_array",
-	"PoolRealArray":    "C.godot_pool_real_array",
-	"PoolStringArray":  "C.godot_pool_string_array",
-	"PoolVector2Array": "C.godot_pool_vector2_array",
-	"PoolVector3Array": "C.godot_pool_vector3_array",
-	"PoolColorArray":   "C.godot_pool_color_array",
-	"Quat":             "C.godot_quat",
-	"Rect2":            "C.godot_rect2",
-	"AABB":             "C.godot_aabb",
-	"RID":              "C.godot_rid",
-	"String":           "C.godot_string",
-	"Transform":        "C.godot_transform",
-	"Transform2D":      "C.godot_transform2d",
-	"Variant":          "C.godot_variant",
-	"Vector2":          "C.godot_vector2",
-	"Vector3":          "C.godot_vector3",
+	"Array":            "godot_array",
+	"Basis":            "godot_basis",
+	"Color":            "godot_color",
+	"Dictionary":       "godot_dictionary",
+	"Error":            "godot_error",
+	"NodePath":         "godot_node_path",
+	"Plane":            "godot_plane",
+	"PoolByteArray":    "godot_pool_byte_array",
+	"PoolIntArray":     "godot_pool_int_array",
+	"PoolRealArray":    "godot_pool_real_array",
+	"PoolStringArray":  "godot_pool_string_array",
+	"PoolVector2Array": "godot_pool_vector2_array",
+	"PoolVector3Array": "godot_pool_vector3_array",
+	"PoolColorArray":   "godot_pool_color_array",
+	"Quat":             "godot_quat",
+	"Rect2":            "godot_rect2",
+	"AABB":             "godot_aabb",
+	"RID":              "godot_rid",
+	"String":           "godot_string",
+	"Transform":        "godot_transform",
+	"Transform2D":      "godot_transform2d",
+	"Variant":          "godot_variant",
+	"Vector2":          "godot_vector2",
+	"Vector3":          "godot_vector3",
 }
 
 func isCoreType(name string) bool {
@@ -889,12 +928,12 @@ func generateICallImplementation(icalls map[GodotCallSigKey]struct{}) string {
 			methodArgs = append(methodArgs, fmt.Sprintf("arg%d %s", i, methodArg))
 		}
 
-		//methodSig += fmt.Sprintf("func %s(%s) %s", getICallName(icall), strings.Join(methodArgs, ","), returnType(retType))
+		//methodSig += fmt.Sprintf("func %s(%s) %s", getICallName(icall), strings.Join(methodArgs, ","), gdNativeType(retType))
 
 		source = append(source, methodSig+" {")
 
 		if retType != "void" {
-			source = append(source, "\t"+returnType(retType)+"ret;")
+			source = append(source, "\t"+gdNativeType(retType)+"ret;")
 			if isClassType(retType) {
 				source = append(source, "\tret = nullptr;")
 			}

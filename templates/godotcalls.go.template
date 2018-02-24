@@ -3,54 +3,67 @@ package godot
 /*
 #include <stdio.h>
 #include <stdlib.h>
-#include <gdnative/gdnative.h>
-#include <nativescript/godot_nativescript.h>
+#include <gdnative_api_struct.gen.h>
 
-void **build_array(int length);
-void **build_array(int length) {
-	void *ptr;
-	void **arr = malloc(sizeof(void *) * length);
-	for (int i = 0; i < length; i++) {
-	    arr[i] = ptr;
-	}
+const extern godot_gdnative_core_api_struct *api;
 
-	return arr;
+{{ range $_, $ctype := .CoreTypeMap -}}
+{{ $ctype }} *new_{{ $ctype}}();
+{{ $ctype }} *new_{{ $ctype}}() {
+	return malloc(sizeof({{ $ctype }}));
 }
+{{ end }}
 
-void add_element(void**, void*, int);
-void add_element(void **array, void *element, int index) {
-	{{ if .Debug }}printf("CGO: Array %p %p %p %p %p\n", &array, array, &array[index], *array, array[index]);{{end}}
-    array[index] = element;
-	{{ if .Debug }}
-		printf("CGO: Index %i %p\n", index, element);
-		printf("CGO: Array %p %p %p %p %p\n", &array, array, &array[index], *array, array[index]);
-	{{end}}
-}
+{{ range .GodotCalls -}}
+{{ if eq .ReturnType "String"}}const {{end}} {{- .GodotCallDefC }};
+{{ end }}
+
+{{ range .GodotCalls -}}
+{{ template "godotcall.c.template" .}}
+{{ end }}
+
 */
 import "C"
 
 import (
-    {{ if .Debug }}"log"{{end}}
+    {{ if .Debug }}
+	"log"
+	"fmt"
+	{{end}}
 	"unsafe"
 )
 
-func getGodotMethod(baseClass string, methodName string) *C.godot_method_bind {
+var methodBinds map[string]map[string]*C.godot_method_bind = make(map[string]map[string]*C.godot_method_bind)
+
+func lookupGodotMethod(baseClass string, methodName string) *C.godot_method_bind {
 	// Convert the base class and method names to C strings.
-	{{ if .Debug }}log.Println("  Using base class: ", baseClass){{end}}
 	classCString := C.CString(baseClass)
 	defer C.free(unsafe.Pointer(classCString))
-
-	{{ if .Debug }}log.Println("  Using method name: ", methodName){{end}}
 	methodCString := C.CString(methodName)
 	defer C.free(unsafe.Pointer(methodCString))
 
-	// Get the Godot method bind pointer so we can pass it to godot_method_bind_ptrcall.
+	// Get the Godot method bind pointer
 	var methodBind *C.godot_method_bind
 	methodBind = C.godot_method_bind_get_method(classCString, methodCString)
-	{{ if .Debug }}log.Println("  Using method bind pointer: ", methodBind){{end}}
+	{{ if .Debug }}log.Println("  Found method bind pointer:", fmt.Sprintf("0x%x", uintptr(unsafe.Pointer(methodBind))), "for", baseClass, "::", methodName){{end}}
 	return methodBind
 }
 
+func getGodotMethod(baseClass string, methodName string) *C.godot_method_bind {
+	if cms, found := methodBinds[baseClass]; found {
+		if mb, found := cms[methodName]; found {
+			return mb
+		}
+		mb := lookupGodotMethod(baseClass, methodName)
+		cms[methodName] = mb
+		return mb
+	}
+	mb := lookupGodotMethod(baseClass, methodName)
+	methodBinds[baseClass] = map[string]*C.godot_method_bind{methodName: mb}
+	return mb
+}
+
+
 {{ range .GodotCalls -}}
-	{{ template "godotcall.template" .}}
+	{{ template "godotcall.go.template" .}}
 {{ end }}

@@ -1,0 +1,42 @@
+{{ if eq .ReturnType "String"}}const {{end}}{{- .GodotCallDefC }} {
+    {{if ne .ReturnType "void" -}}
+    {{ .GetReturnType }} {{if .IsPrimitive .ReturnType | not -}}*{{- end -}}ret
+    {{- if .IsCoreType .ReturnType}} = new_{{ .GetReturnType }}(){{end}};
+    {{end -}}
+    {{range $i, $arg := .Arguments -}}
+    {{if eq "String" .Type -}}
+    godot_string gArg{{$i}};
+    api->godot_string_new(&gArg{{$i}});
+    api->godot_string_parse_utf8(&gArg{{$i}}, {{.Name}});
+    {{end -}}
+    {{end -}}
+    const void *c_args[] = { 
+    {{- range $i, $arg := .Arguments -}}
+    {{- if eq "String" .Type}}&gArg{{$i}}
+    {{- else -}}{{- if $arg.IsPrimitive -}}&{{end}}{{.Name}}
+    {{- end -}},
+    {{- end -}}
+    };
+    {{if .Debug -}}
+    printf("CGO: {{ .GodotCallNameC }} calling godot_method_bind_ptrcall...\n");
+    {{end -}}
+    api->godot_method_bind_ptrcall(mb, instance, c_args, 
+    {{- if eq .ReturnType "void" }} NULL
+    {{- else}}{{ if .IsCoreType .ReturnType | not }}&{{end}}ret{{end}});
+    {{if .Debug -}}
+    printf("CGO: {{ .GodotCallNameC }} ...godot_method_bind_ptrcall returned\n");
+    {{end -}}
+    {{range $i, $arg := .Arguments -}}
+    {{ if eq "String" .Type -}}
+    godot_string_destroy(&gArg{{$i}});
+    {{end -}}
+    {{end -}}
+    {{ if eq .ReturnType "String" -}}
+    godot_char_string gcsRet = godot_string_utf8(ret);
+    const char *cRet = api->godot_char_string_get_data(&gcsRet);
+    api->godot_char_string_destroy(&gcsRet);
+    return cRet;
+    {{ else if ne .ReturnType "void" -}}
+    return ret;
+    {{- end}}
+}
