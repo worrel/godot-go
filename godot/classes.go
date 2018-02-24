@@ -12,6 +12,7 @@ package godot
 /*
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <gdnative_api_struct.gen.h>
 #include <gdnative/gdnative.h>
 #include <nativescript/godot_nativescript.h>
@@ -35,6 +36,85 @@ void add_element(void **array, void *element, int index) {
     array[index] = element;
 	printf("CGO: Index %i %p\n", index, element);
 	printf("CGO: Array %p %p %p %p %p\n", &array, array, &array[index], *array, array[index]);
+}
+
+char *go_string_alloc_chars(_GoString_);
+char *go_string_alloc_chars(_GoString_ gstring) {
+	const char *gchar = _GoStringPtr(gstring);
+	const int glen = _GoStringLen(gstring);
+	char *ret = malloc(glen+1);
+	strncat(ret, gchar, glen);
+	return ret;
+}
+
+void dump_args(const void** args);
+void dump_args(const void** args) {
+	const int len = sizeof(args)/sizeof(void*);
+	printf("CGO: %d args: ", len);
+	for (int i = 0; i < len; i++) {
+		printf("%p ", args[i]);
+	}
+	printf("\n");
+}
+
+godot_method_bind *api_godot_method_bind_get_method(_GoString_,_GoString_);
+godot_method_bind *api_godot_method_bind_get_method(_GoString_ _class_name, _GoString_ _method_name) {
+	char *class_name = go_string_alloc_chars(_class_name);
+	char *method_name = go_string_alloc_chars(_method_name);
+
+	printf("CGO: looking up methodbind: %s::%s\n", class_name, method_name);
+	godot_method_bind *gmb = api->godot_method_bind_get_method(class_name, method_name);
+	printf("CGO: got methodbind: %p\n", gmb);
+
+	free(class_name);
+	free(method_name);
+
+	return gmb;
+}
+
+void api_godot_method_bind_ptrcall(godot_method_bind*, godot_object*, const void**, void*);
+void api_godot_method_bind_ptrcall(godot_method_bind *p_method_bind, godot_object *p_instance, const void **p_args, void *p_ret) {
+	printf("CGO: about to ptrcall methodbind: %p on instance %p\n", p_method_bind, p_instance);
+	printf("CGO: ret: %p\n", p_ret);
+	dump_args(p_args);
+
+	api->godot_method_bind_ptrcall(p_method_bind, p_instance, p_args, p_ret);
+	printf("CGO: done with ptrcall methodbind: %p on instance %p\n", p_method_bind, p_instance);
+}
+
+godot_object *get_node_c0(godot_object*,_GoString_,_GoString_,char*);
+godot_object *get_node_c0(godot_object *instance, _GoString_ _class_name, _GoString_ _method_name, char *node_name) {
+	const char *class_name = _GoStringPtr(_class_name);
+	const char *method_name = _GoStringPtr(_method_name);
+	printf("CGO: in get_node_c1: %p, %s, %s, %s\n", instance, class_name, method_name, node_name);
+	
+	static godot_method_bind *mb = NULL;
+	if (!mb) {
+		mb = api->godot_method_bind_get_method(class_name, method_name);
+	}
+	printf("CGO: get_node_c1 got method_bind %p\n", mb);
+
+	godot_object *obj;
+	godot_node_path np;
+	{
+		godot_string name;
+		api->godot_string_new(&name);
+		api->godot_string_parse_utf8(&name, node_name);
+		api->godot_node_path_new(&np, &name);
+		api->godot_string_destroy(&name);
+	}
+	const void *c_args[] = {
+		&np
+	};
+
+	printf("CGO: get_node_c1 about to call Godot\n");
+	api->godot_method_bind_ptrcall(mb, instance, c_args, &obj);
+	printf("CGO: get_node_c1 done calling Godot\n");
+	
+	api->godot_node_path_destroy(&np);
+
+	printf("CGO: get_node_c1 done!\n");
+	return obj;
 }
 
 godot_object *get_node_c1(godot_object*,char*,char*,char*);
@@ -106,8 +186,36 @@ godot_object *get_node_c2(godot_object *instance, char *node_name) {
 	return obj;
 }
 
+void set_animation_c0(godot_object*, _GoString_, _GoString_, char*);
+void set_animation_c0(godot_object *instance, _GoString_ _class_name, _GoString_ _method_name, char *anim_name) {
+	const char *class_name = _GoStringPtr(_class_name);
+	const char *method_name = _GoStringPtr(_method_name);
+	printf("CGO: in set_animation_c1: %p, %s, %s, %s\n", instance, class_name, method_name, anim_name);
+	
+	static godot_method_bind *mb = NULL;
+	if (!mb) {
+		mb = api->godot_method_bind_get_method(class_name, method_name);
+	}
+	printf("CGO: set_animation_c1 got method_bind %p\n", mb);
+
+	godot_string name;
+	api->godot_string_new(&name);
+	api->godot_string_parse_utf8(&name, anim_name);
+
+	const void *c_args[] = {
+		&name
+	};
+
+	printf("CGO: set_animation_c1 about to call Godot\n");
+	api->godot_method_bind_ptrcall(mb, instance, c_args, NULL);
+	printf("CGO: set_animation_c1 done calling Godot\n");
+
+	api->godot_string_destroy(&name);
+	printf("CGO: set_animation_c1 done!\n");
+}
+
 void set_animation_c1(godot_object*, char*, char*, char*);
-void set_animation_c1(godot_object *instance, char* class_name, char* method_name, char *anim_name) {
+void set_animation_c1(godot_object *instance, char *class_name, char *method_name, char *anim_name) {
 	printf("CGO: in set_animation_c1: %p, %s, %s, %s\n", instance, class_name, method_name, anim_name);
 	
 	static godot_method_bind *mb = NULL;
@@ -2395,6 +2503,19 @@ func (o *AnimatedSprite) SetAnimation(animation string) {
 
 }
 
+func (o *AnimatedSprite) SetAnimationC0(animation string) {
+	log.Println("Calling AnimatedSprite.SetAnimationC0()")
+
+	instance := unsafe.Pointer(o.getOwner())
+	anim_name := C.CString(animation)
+	defer C.free(unsafe.Pointer(anim_name))
+
+	log.Println("  About to call")
+	C.set_animation_c0(instance, o.baseClass(), "set_animation", anim_name)
+	log.Println("  Function successfully completed.")
+
+}
+
 func (o *AnimatedSprite) SetAnimationC1(animation string) {
 	log.Println("Calling AnimatedSprite.SetAnimationC1()")
 
@@ -2403,7 +2524,7 @@ func (o *AnimatedSprite) SetAnimationC1(animation string) {
 	defer C.free(unsafe.Pointer(anim_name))
 	class_name := C.CString(o.baseClass())
 	defer C.free(unsafe.Pointer(class_name))
-	method_name := C.CString("get_node")
+	method_name := C.CString("set_animation")
 	defer C.free(unsafe.Pointer(method_name))
 
 	log.Println("  About to call")
@@ -57441,6 +57562,24 @@ func (o *Node) GetNode(path *NodePath) *Node {
 
 }
 
+func (o *Node) GetNodeC0(path *NodePath) *Node {
+	log.Println("Calling Node.GetNodeC0()")
+
+	instance := unsafe.Pointer(o.getOwner())
+	node_path := C.CString(path.AsString())
+	defer C.free(unsafe.Pointer(node_path))
+
+	log.Println("  About to call")
+	gNode := C.get_node_c0(instance, o.baseClass(), "get_node", node_path)
+	log.Println("  Function successfully completed.")
+
+
+	log.Println("  Got return value: ", gNode)
+	node := Node{}
+	node.owner = (*C.godot_object)(gNode)
+	return &node
+}
+
 func (o *Node) GetNodeC1(path *NodePath) *Node {
 	log.Println("Calling Node.GetNodeC1()")
 
@@ -60217,9 +60356,9 @@ func (o *Object) callParentMethod(baseClass, methodName string, args []reflect.V
 
 	// Convert the base class and method names to C strings.
 	log.Println("  Using base class: ", baseClass)
-	classCString := C.CString(baseClass)
+	//classCString := C.CString(baseClass)
 	log.Println("  Using method name: ", methodName)
-	methodCString := C.CString(methodName)
+	//methodCString := C.CString(methodName)
 
 	// Get the Godot objects owner so we can pass it to godot_method_bind_ptrcall.
 	log.Println("  Using godot object owner:", o.getOwner())
@@ -60227,7 +60366,8 @@ func (o *Object) callParentMethod(baseClass, methodName string, args []reflect.V
 
 	// Get the Godot method bind pointer so we can pass it to godot_method_bind_ptrcall.
 	var methodBind *C.godot_method_bind
-	methodBind = C.godot_method_bind_get_method(classCString, methodCString)
+	//methodBind = C.godot_method_bind_get_method(classCString, methodCString)
+	methodBind = C.api_godot_method_bind_get_method(baseClass, methodName)
 	log.Println("  Using method bind pointer: ", methodBind)
 
 	// Loop through the given arguments and see what type they are. When we know what
@@ -60270,7 +60410,7 @@ func (o *Object) callParentMethod(baseClass, methodName string, args []reflect.V
 
 	// Call the parent method. "ret" will be populated with the return value.
 	log.Println("  Calling bind_ptrcall...")
-	C.godot_method_bind_ptrcall(
+	C.api_godot_method_bind_ptrcall(
 		methodBind,
 		objectOwner,
 		cArgsArray, // void**
