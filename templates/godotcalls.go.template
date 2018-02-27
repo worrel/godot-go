@@ -15,7 +15,7 @@ const extern godot_gdnative_core_api_struct *api;
 {{ end }}
 
 {{ range .GodotCalls -}}
-{{ if eq .ReturnType "String"}}const {{end}} {{- .GodotCallDefC }};
+{{- .GodotCallDefC }};
 {{ end }}
 
 {{ range .GodotCalls -}}

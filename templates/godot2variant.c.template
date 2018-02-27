@@ -1,0 +1,28 @@
+{{ if eq "bool" . -}}api->godot_variant_new_bool
+{{- else if eq "int" . -}}api->godot_variant_new_int
+{{- else if eq "float" . -}}api->godot_variant_new_real
+{{- else if eq "Array" . -}}api->godot_variant_new_array
+{{- else if eq "Basis" . -}}api->godot_variant_new_basis
+{{- else if eq "Color" . -}}api->godot_variant_new_color
+{{- else if eq "String" . -}}api->godot_variant_new_string
+{{- else if eq "Dictionary" . -}}api->godot_variant_new_dictionary
+{{- else if eq "NodePath" . -}}api->godot_variant_new_node_path
+{{- else if eq "Plane" . -}}api->godot_variant_new_plane
+{{- else if eq "Quat" . -}}api->godot_variant_new_quat
+{{- else if eq "Rect2" . -}}api->godot_variant_new_rect2
+{{- else if eq "AABB" . -}}api->godot_variant_new_aabb
+{{- else if eq "RID" . -}}api->godot_variant_new_rid
+{{- else if eq "Transform" . -}}api->godot_variant_new_transform
+{{- else if eq "Transform2d" . -}}api->godot_variant_new_transform2d
+{{- else if eq "Variant" . -}}api->godot_variant_new_variant
+{{- else if eq "Vector2" . -}}api->godot_variant_new_vector2
+{{- else if eq "Vector3" . -}}api->godot_variant_new_vector3
+{{- else if eq "Pool_bByte_Array" . -}}api->godot_variant_new_pool_byte_array
+{{- else if eq "Pool_Int_Array" . -}}api->godot_variant_new_pool_int_array
+{{- else if eq "Pool_Real_Array" . -}}api->godot_variant_new_pool_real_array
+{{- else if eq "Pool_String_Array" . -}}api->godot_variant_new_pool_string_array
+{{- else if eq "Pool_Vector2_Array" . -}}api->godot_variant_new_pool_vector2_array
+{{- else if eq "Pool_Vector3_Array" . -}}api->godot_variant_new_pool_vector3_array
+{{- else if eq "Pool_Color_Array" . -}}api->godot_variant_new_pool_color_array
+{{- else -}}api->godot_variant_new_object
+{{- end}}

@@ -1,8 +1,11 @@
-{{ if eq .ReturnType "String"}}const {{end}}{{- .GodotCallDefC }} {
+{{- .GodotCallDefC }} {
+    {{/* allocate optional return type - not required for varargs which returns a Variant for us*/}}
     {{if ne .ReturnType "void" -}}
-    {{ .GetReturnType }} {{if .IsPrimitive .ReturnType | not -}}*{{- end -}}ret
-    {{- if .IsCoreType .ReturnType}} = new_{{ .GetReturnType }}(){{end}};
+    {{if .HasVarargs | not }}
+    {{if eq "String" .ReturnType -}}godot_string{{- else -}}{{ .ReturnTypeC }}{{end}} {{if .IsPointerReturn -}}*{{- end -}}ret;
     {{end -}}
+    {{end -}}
+    {{/* convert char*s to godot_strings */}}
     {{range $i, $arg := .Arguments -}}
     {{if eq "String" .Type -}}
     godot_string gArg{{$i}};
@@ -10,6 +13,25 @@
     api->godot_string_parse_utf8(&gArg{{$i}}, {{.Name}});
     {{end -}}
     {{end -}}
+
+    {{/* construct godot call arguments */}}
+    {{ if .HasVarargs -}}
+    {{/* construct vararg call arguments */}}
+    int numVarArgs = api->godot_array_size({{ .Varargs.Name }});
+    godot_variant fixedArgs[{{ len .Arguments }}];
+    godot_variant **c_args = (godot_variant **) alloca(sizeof(godot_variant *) * ( numVarArgs + {{ len .Arguments }}));
+    {{range $i, $arg := .Arguments -}}
+    godot_variant *pV{{$arg.Name}};
+    {{template "godot2variant.c.template" $arg.Type}}(pV{{.Name}},{{if eq "String" $arg.Type}}&gArg{{$i}}{{else}}{{.Name}}{{end}});
+    fixedArgs[{{$i}}] = *pV{{$arg.Name}};
+    c_args[{{$i}}] = (godot_variant *) &fixedArgs[{{$i}}];
+    {{ end -}}
+	for (int i = 0; i < numVarArgs; i++) {
+        godot_variant varg = godot_array_get({{ .Varargs.Name }}, i);
+		c_args[i + {{ len .Arguments }}] = (godot_variant *) &varg;
+	}
+    {{else -}}
+    {{/* construct the non-vararg call arguments */}}
     const void *c_args[] = { 
     {{- range $i, $arg := .Arguments -}}
     {{- if eq "String" .Type}}&gArg{{$i}}
@@ -17,26 +39,48 @@
     {{- end -}},
     {{- end -}}
     };
+    {{end}}
+    {{if .HasVarargs -}}
+    {{if .Debug -}}
+    printf("CGO: {{ .GodotCallNameC }} calling godot_method_bind_call...\n");
+    {{end -}}
+    const godot_variant varArgsRet;
+    *(godot_variant *) &varArgsRet = api->godot_method_bind_call(mb, instance, (const godot_variant **) c_args, ({{ len .Arguments }} + numVarArgs), NULL);
+    {{if .Debug -}}
+    printf("CGO: {{ .GodotCallNameC }} ...godot_method_bind_call returned\n");
+    {{end -}}
+    {{/* destroy any allocated variants */}}
+	api->godot_variant_destroy((godot_variant *) &fixedArgs[0]);
+    {{else -}}
     {{if .Debug -}}
     printf("CGO: {{ .GodotCallNameC }} calling godot_method_bind_ptrcall...\n");
     {{end -}}
-    api->godot_method_bind_ptrcall(mb, instance, c_args, 
-    {{- if eq .ReturnType "void" }} NULL
-    {{- else}}{{ if .IsCoreType .ReturnType | not }}&{{end}}ret{{end}});
+    api->godot_method_bind_ptrcall(mb, instance, c_args, {{ if eq .ReturnType "void" }}NULL{{else}}&ret{{end}});
     {{if .Debug -}}
     printf("CGO: {{ .GodotCallNameC }} ...godot_method_bind_ptrcall returned\n");
     {{end -}}
+    {{end -}}
+    {{/* destroy any allocated strings */}}
     {{range $i, $arg := .Arguments -}}
     {{ if eq "String" .Type -}}
-    godot_string_destroy(&gArg{{$i}});
+    api->godot_string_destroy(&gArg{{$i}});
     {{end -}}
     {{end -}}
     {{ if eq .ReturnType "String" -}}
-    godot_char_string gcsRet = godot_string_utf8(ret);
+    godot_char_string gcsRet = godot_string_utf8(&ret);
     const char *cRet = api->godot_char_string_get_data(&gcsRet);
     api->godot_char_string_destroy(&gcsRet);
     return cRet;
     {{ else if ne .ReturnType "void" -}}
+    {{if .HasVarargs -}}
+    {{if eq .ReturnType "Variant" -}}
+    return varArgsRet;
+    {{else -}}
+    {{ .ReturnTypeC }} {{if .IsPointerReturn -}}*{{- end -}} ret;
+    return {{template "variant2godot.c.template" .ReturnType}}(&varArgsRet);
+    {{end -}}
+    {{else -}}
     return ret;
+    {{end -}}
     {{- end}}
 }

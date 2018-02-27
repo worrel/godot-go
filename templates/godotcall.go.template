@@ -10,34 +10,39 @@ func {{ $view.GodotCallDefGo }} {
     cArg{{$i}} := {{ template "go2godot.go.template" $arg}}
     {{end -}}
     {{ end }}
+    {{ if .HasVarargs -}}
+    cVarArgs := {{ template "go2godot.go.template" .Varargs}}
+    {{ end -}}
 	{{ if $view.Debug -}}
     log.Println("  Calling {{$view.GodotCallNameC}}...")
     {{end -}}
-	{{ if ne .ReturnType "void" -}}
-    cRet := {{end}}C.{{$view.GodotCallNameC}}(
+	{{ if ne .ReturnType "void" -}}cRet := {{end -}}
+    C.{{$view.GodotCallNameC}}(
         unsafe.Pointer(o.getOwner()),
         getGodotMethod(o.baseClass(), methodName),
         {{ range $i, $arg := .Arguments -}}
         cArg{{ $i }},
-        {{- end }}
+        {{- end -}}
+        {{ if .HasVarargs -}}
+        cVarArgs,
+        {{- end}}
 	)
     {{ if $view.Debug -}}
     log.Println("  ...{{$view.GodotCallNameC}} returned")
     {{end -}}
     {{ if ne .ReturnType "void" -}}
-    {{ if .IsPrimitive .ReturnType -}}
-    ret := cRet
-    return {{ template "godot2go.go.template" $view.GetReturnType }}
+    {{ if eq "bool" .ReturnType -}}return bool(cRet);
+    {{ else if eq "int" .ReturnType -}}return int64(cRet);
+    {{ else if eq "float" .ReturnType -}}return float64(cRet);
+    {{ else if eq .ReturnType "String" -}}return C.GoString(cRet)
     {{ else -}}
-    {{ if eq .ReturnType "String" -}}
-    return C.GoString(cRet)
-    {{ else -}}
+    {{if .IsPointerReturn -}}
     if cRet == nil {
         return nil
     }
-    ret := (*C.{{$view.GetReturnType}})(cRet)
-    return {{ template "godot2go.go.template" $view.GetReturnType }}
     {{end -}}
+    ret := ({{if .IsPointerReturn}}*{{end}}C.{{$view.ReturnTypeC}})(cRet)
+    return &{{ template "godot2go.go.template" $view.ReturnTypeC }}{ {{if not .IsPointerReturn}}&{{end}}ret }
     {{end -}}
     {{- end}}
 }

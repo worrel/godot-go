@@ -23134,10 +23134,16 @@ func (o *FuncRef) baseClass() string {
 /*
    Calls the referenced function previously set by [method set_function] or [method @GDScript.funcref].
 */
-func (o *FuncRef) CallFunc() *Variant {
+func (o *FuncRef) CallFunc(varArgs ...interface{}) *Variant {
 	log.Println("Calling FuncRef.CallFunc()")
 
-	returnValue := godotCallVariant(o, "call_func")
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallVariantVarargs(o, "call_func", varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	return returnValue
@@ -23438,10 +23444,16 @@ func (o *GDScript) GetAsByteCode() *PoolByteArray {
 /*
    Undocumented
 */
-func (o *GDScript) New() *Object {
+func (o *GDScript) New(varArgs ...interface{}) *Object {
 	log.Println("Calling GDScript.New()")
 
-	returnValue := godotCallObject(o, "new")
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallObjectVarargs(o, "new", varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	var ret Object
@@ -23471,10 +23483,16 @@ func (o *GDScriptFunctionState) baseClass() string {
 /*
    Undocumented
 */
-func (o *GDScriptFunctionState) X_SignalCallback() *Variant {
+func (o *GDScriptFunctionState) X_SignalCallback(varArgs ...interface{}) *Variant {
 	log.Println("Calling GDScriptFunctionState.X_SignalCallback()")
 
-	returnValue := godotCallVariant(o, "_signal_callback")
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallVariantVarargs(o, "_signal_callback", varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	return returnValue
@@ -35519,10 +35537,16 @@ func (o *NativeScript) GetLibrary() *GDNativeLibrary {
 /*
    Undocumented
 */
-func (o *NativeScript) New() *Object {
+func (o *NativeScript) New(varArgs ...interface{}) *Object {
 	log.Println("Calling NativeScript.New()")
 
-	returnValue := godotCallObject(o, "new")
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallObjectVarargs(o, "new", varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	var ret Object
@@ -37903,10 +37927,16 @@ func (o *Node) RequestReady() {
 /*
    Sends a remote procedure call request to all peers on the network (and locally), optionally sending additional data as arguments. Call request will be received by nodes with the same [NodePath].
 */
-func (o *Node) Rpc(method string) *Variant {
+func (o *Node) Rpc(method string, varArgs ...interface{}) *Variant {
 	log.Println("Calling Node.Rpc()")
 
-	returnValue := godotCallVariantString(o, "rpc", method)
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallVariantStringVarargs(o, "rpc", method, varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	return returnValue
@@ -37927,10 +37957,16 @@ func (o *Node) RpcConfig(method string, mode int64) {
 /*
    Sends a [method rpc] to a specific peer identified by [i]peer_id[/i].
 */
-func (o *Node) RpcId(peerId int64, method string) *Variant {
+func (o *Node) RpcId(peerId int64, method string, varArgs ...interface{}) *Variant {
 	log.Println("Calling Node.RpcId()")
 
-	returnValue := godotCallVariantIntString(o, "rpc_id", peerId, method)
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallVariantIntStringVarargs(o, "rpc_id", peerId, method, varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	return returnValue
@@ -37940,10 +37976,16 @@ func (o *Node) RpcId(peerId int64, method string) *Variant {
 /*
    Sends a [method rpc] using an unreliable protocol.
 */
-func (o *Node) RpcUnreliable(method string) *Variant {
+func (o *Node) RpcUnreliable(method string, varArgs ...interface{}) *Variant {
 	log.Println("Calling Node.RpcUnreliable()")
 
-	returnValue := godotCallVariantString(o, "rpc_unreliable", method)
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallVariantStringVarargs(o, "rpc_unreliable", method, varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	return returnValue
@@ -37953,10 +37995,16 @@ func (o *Node) RpcUnreliable(method string) *Variant {
 /*
    Sends a [method rpc] to a specific peer identified by [i]peer_id[/i] using an unreliable protocol.
 */
-func (o *Node) RpcUnreliableId(peerId int64, method string) *Variant {
+func (o *Node) RpcUnreliableId(peerId int64, method string, varArgs ...interface{}) *Variant {
 	log.Println("Calling Node.RpcUnreliableId()")
 
-	returnValue := godotCallVariantIntString(o, "rpc_unreliable_id", peerId, method)
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallVariantIntStringVarargs(o, "rpc_unreliable_id", peerId, method, varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	return returnValue
@@ -38672,10 +38720,16 @@ func (o *Object) AddUserSignal(signal string, arguments *Array) {
 /*
    Calls the [code]method[/code] on the object and returns a result. Pass parameters as a comma separated list.
 */
-func (o *Object) Call(method string) *Variant {
+func (o *Object) Call(method string, varArgs ...interface{}) *Variant {
 	log.Println("Calling Object.Call()")
 
-	returnValue := godotCallVariantString(o, "call", method)
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallVariantStringVarargs(o, "call", method, varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	return returnValue
@@ -38685,10 +38739,16 @@ func (o *Object) Call(method string) *Variant {
 /*
    Calls the [code]method[/code] on the object during idle time and returns a result. Pass parameters as a comma separated list.
 */
-func (o *Object) CallDeferred(method string) *Variant {
+func (o *Object) CallDeferred(method string, varArgs ...interface{}) *Variant {
 	log.Println("Calling Object.CallDeferred()")
 
-	returnValue := godotCallVariantString(o, "call_deferred", method)
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallVariantStringVarargs(o, "call_deferred", method, varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	return returnValue
@@ -38748,10 +38808,16 @@ func (o *Object) Disconnect(signal string, target *Object, method string) {
 /*
    Emits the given [code]signal[/code].
 */
-func (o *Object) EmitSignal(signal string) *Variant {
+func (o *Object) EmitSignal(signal string, varArgs ...interface{}) *Variant {
 	log.Println("Calling Object.EmitSignal()")
 
-	returnValue := godotCallVariantString(o, "emit_signal", signal)
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallVariantStringVarargs(o, "emit_signal", signal, varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	return returnValue
@@ -53769,10 +53835,16 @@ func (o *SceneTree) X_ServerDisconnected() {
 /*
 
  */
-func (o *SceneTree) CallGroup(group string, method string) *Variant {
+func (o *SceneTree) CallGroup(group string, method string, varArgs ...interface{}) *Variant {
 	log.Println("Calling SceneTree.CallGroup()")
 
-	returnValue := godotCallVariantStringString(o, "call_group", group, method)
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallVariantStringStringVarargs(o, "call_group", group, method, varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	return returnValue
@@ -53782,10 +53854,16 @@ func (o *SceneTree) CallGroup(group string, method string) *Variant {
 /*
 
  */
-func (o *SceneTree) CallGroupFlags(flags int64, group string, method string) *Variant {
+func (o *SceneTree) CallGroupFlags(flags int64, group string, method string, varArgs ...interface{}) *Variant {
 	log.Println("Calling SceneTree.CallGroupFlags()")
 
-	returnValue := godotCallVariantIntStringString(o, "call_group_flags", flags, group, method)
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallVariantIntStringStringVarargs(o, "call_group_flags", flags, group, method, varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	return returnValue
@@ -68164,10 +68242,16 @@ func (o *UndoRedo) baseClass() string {
 /*
 
  */
-func (o *UndoRedo) AddDoMethod(object *Object, method string) *Variant {
+func (o *UndoRedo) AddDoMethod(object *Object, method string, varArgs ...interface{}) *Variant {
 	log.Println("Calling UndoRedo.AddDoMethod()")
 
-	returnValue := godotCallVariantObjectString(o, "add_do_method", object, method)
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallVariantObjectStringVarargs(o, "add_do_method", object, method, varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	return returnValue
@@ -68199,10 +68283,16 @@ func (o *UndoRedo) AddDoReference(object *Object) {
 /*
 
  */
-func (o *UndoRedo) AddUndoMethod(object *Object, method string) *Variant {
+func (o *UndoRedo) AddUndoMethod(object *Object, method string, varArgs ...interface{}) *Variant {
 	log.Println("Calling UndoRedo.AddUndoMethod()")
 
-	returnValue := godotCallVariantObjectString(o, "add_undo_method", object, method)
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallVariantObjectStringVarargs(o, "add_undo_method", object, method, varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	return returnValue
@@ -72211,10 +72301,16 @@ func (o *VisualScriptFunctionState) baseClass() string {
 /*
    Undocumented
 */
-func (o *VisualScriptFunctionState) X_SignalCallback() *Variant {
+func (o *VisualScriptFunctionState) X_SignalCallback(varArgs ...interface{}) *Variant {
 	log.Println("Calling VisualScriptFunctionState.X_SignalCallback()")
 
-	returnValue := godotCallVariant(o, "_signal_callback")
+	varArgsArray := NewArray()
+	for idx, varArg := range varArgs {
+		// TODO: populate varargs array once Array methods implemented
+		log.Println("Vararg idx=", idx, ": ", varArg)
+	}
+
+	returnValue := godotCallVariantVarargs(o, "_signal_callback", varArgsArray)
 	log.Println("  Got return value: ", returnValue)
 
 	return returnValue

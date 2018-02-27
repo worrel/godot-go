@@ -288,22 +288,21 @@ func (v View) CoreTypeMap() map[string]string {
 	return coreTypesGo2Godot
 }
 
-func (v View) GodotCall(method GDMethod) string {
+func (v View) VarargsArrayName() string {
+	return "varArgsArray"
+}
+
+func (v View) GetSignature(method GDMethod) GodotCallSignature {
 	var args []string
 	for _, arg := range method.Arguments {
-		args = append(args, getICallTypeName(arg.Type))
+		args = append(args, getTypeAlias(arg.Type))
 	}
-	icallRetType := getICallTypeName(method.ReturnType)
-	sigKey := GodotCallSigKey{icallRetType, strings.Join(args, ",")}
 
-	argNames := []string{"o", strconv.Quote(method.Name)}
-	for _, arg := range method.Arguments {
-		argName := v.GoArgName(arg.Name)
-		if isClassType(arg.Type) && !(arg.Type == "Object") {
-			argName = fmt.Sprintf("&%s.Object", argName)
-		}
-		argNames = append(argNames, argName)
-		//TODO: escape_cpp(arg["name"]) + (".ptr()" if isReferenceType(arg["type"]) else "")
+	retType := getTypeAlias(method.ReturnType)
+	sigKey := GodotCallSigKey{
+		ReturnType:          retType,
+		ArgTypesStringified: strings.Join(args, ","),
+		HasVarargs:          method.HasVarargs,
 	}
 
 	var sig GodotCallSignature
@@ -315,13 +314,47 @@ func (v View) GodotCall(method GDMethod) string {
 				fmt.Sprintf("arg%d", idx),
 				arg,
 				isPrimitive(arg),
+				false,
 			}
 		}
-		sig = GodotCallSignature{icallRetType, godotArgs, v.Debug}
+		var varArgs *GodotCallArg
+		if method.HasVarargs {
+			varArgs = &GodotCallArg{
+				fmt.Sprintf("arg%d", len(args)),
+				"Array",
+				false,
+				true,
+			}
+		}
+		sig = GodotCallSignature{
+			ReturnType: retType,
+			Arguments:  godotArgs,
+			Varargs:    varArgs,
+			HasVarargs: method.HasVarargs,
+			Debug:      v.Debug,
+		}
 		v.GodotCalls[sigKey] = sig
 	}
-	icallName := sig.GodotCallNameGo()
-	return fmt.Sprintf("%s(%s)", icallName, strings.Join(argNames, ","))
+	return sig
+}
+
+func (v View) GodotCall(method GDMethod) string {
+	sig := v.GetSignature(method)
+
+	argNames := []string{"o", strconv.Quote(method.Name)}
+	for _, arg := range method.Arguments {
+		argName := v.GoArgName(arg.Name)
+		// This is required to pass Object subtypes
+		if isClassType(arg.Type) && !(arg.Type == "Object") {
+			argName = fmt.Sprintf("&%s.Object", argName)
+		}
+		argNames = append(argNames, argName)
+	}
+	if method.HasVarargs {
+		argNames = append(argNames, v.VarargsArrayName())
+	}
+
+	return fmt.Sprintf("%s(%s)", sig.GodotCallNameGo(), strings.Join(argNames, ","))
 }
 
 func main() {
@@ -448,11 +481,14 @@ func main() {
 type GodotCallSigKey struct {
 	ReturnType          string
 	ArgTypesStringified string
+	HasVarargs          bool
 }
 
 type GodotCallSignature struct {
 	ReturnType string
 	Arguments  []GodotCallArg
+	Varargs    *GodotCallArg
+	HasVarargs bool
 	Debug      bool
 }
 
@@ -460,6 +496,11 @@ type GodotCallArg struct {
 	Name        string
 	Type        string
 	IsPrimitive bool
+	IsVararg    bool
+}
+
+func (gcs GodotCallSignature) IsPointerReturn() bool {
+	return isClassType(gcs.ReturnType) && !isEnum(gcs.ReturnType)
 }
 
 func (gcs GodotCallSignature) IsCoreType(t string) bool {
@@ -470,24 +511,28 @@ func (gcs GodotCallSignature) IsPrimitive(t string) bool {
 	return isPrimitive(t)
 }
 
-func (gcs GodotCallSignature) GetReturnType() string {
-	return gdNativeType(gcs.ReturnType)
+func (gcs GodotCallSignature) ReturnTypeC() string {
+	t, _ := gdNativeType(gcs.ReturnType, true)
+	return t
+}
+
+func godotCallName(returnType string, args []GodotCallArg, varargs *GodotCallArg) string {
+	nameParts := []string{fmt.Sprintf("godot_call_%s", stripName(returnType))}
+	for _, arg := range args {
+		nameParts = append(nameParts, stripName(arg.Type))
+	}
+	if varargs != nil {
+		nameParts = append(nameParts, "varargs")
+	}
+	return strings.Join(nameParts, "_")
 }
 
 func (gcs GodotCallSignature) GodotCallNameGo() string {
-	nameParts := []string{fmt.Sprintf("godotCall_%s", stripName(gcs.ReturnType))}
-	for _, arg := range gcs.Arguments {
-		nameParts = append(nameParts, stripName(arg.Type))
-	}
-	return casee.ToCamelCase(strings.Join(nameParts, "_"))
+	return casee.ToCamelCase(godotCallName(gcs.ReturnType, gcs.Arguments, gcs.Varargs))
 }
 
 func (gcs GodotCallSignature) GodotCallNameC() string {
-	nameParts := []string{fmt.Sprintf("godot_call_%s", stripName(gcs.ReturnType))}
-	for _, arg := range gcs.Arguments {
-		nameParts = append(nameParts, stripName(arg.Type))
-	}
-	return strings.ToLower(strings.Join(nameParts, "_"))
+	return strings.ToLower(godotCallName(gcs.ReturnType, gcs.Arguments, gcs.Varargs))
 }
 
 func (gcs GodotCallSignature) GodotCallDefGo() string {
@@ -495,273 +540,91 @@ func (gcs GodotCallSignature) GodotCallDefGo() string {
 	for _, arg := range gcs.Arguments {
 		params = append(params, fmt.Sprintf("%s %s", arg.Name, GetGoValue(arg.Type)))
 	}
+	if gcs.HasVarargs {
+		params = append(params, fmt.Sprintf("%s %s", gcs.Varargs.Name, GetGoValue(gcs.Varargs.Type)))
+	}
 	return fmt.Sprintf("%s(%s) %s", gcs.GodotCallNameGo(), strings.Join(params, ","), GetGoValue(gcs.ReturnType))
 }
 
 func (gcs GodotCallSignature) GodotCallDefC() string {
 	params := []string{"godot_object *instance, godot_method_bind *mb"}
 	for _, arg := range gcs.Arguments {
-		params = append(params, fmt.Sprintf("%s%s", cType(arg.Type), arg.Name))
+		cArgType, ptr := gdNativeType(arg.Type, false)
+		ptrStar := ""
+		if ptr {
+			ptrStar = "*"
+		}
+		params = append(params, fmt.Sprintf("%s %s%s", cArgType, ptrStar, arg.Name))
 	}
-	return fmt.Sprintf("%s%s(%s)", cType(gcs.ReturnType), gcs.GodotCallNameC(), strings.Join(params, ","))
+	if gcs.HasVarargs {
+		cArgType, ptr := gdNativeType(gcs.Varargs.Type, false)
+		ptrStar := ""
+		if ptr {
+			ptrStar = "*"
+		}
+		params = append(params, fmt.Sprintf("%s %s%s", cArgType, ptrStar, gcs.Varargs.Name))
+	}
+
+	cArgType, ptr := gdNativeType(gcs.ReturnType, true)
+	ptrStar := ""
+	if ptr && !(gcs.HasVarargs && gcs.ReturnType == "Variant") {
+		ptrStar = "*"
+	}
+
+	if gcs.ReturnType == "String" {
+		cArgType = "const " + cArgType
+	}
+
+	return fmt.Sprintf("%s %s%s(%s)", cArgType, ptrStar, gcs.GodotCallNameC(), strings.Join(params, ","))
 }
 
 var setMember struct{}
 
-func generateClassImplementation(
-	icalls map[GodotCallSigKey]struct{},
-	usedClasses map[string]struct{},
-	classes map[string]GDAPI,
-	c GDAPI) string {
+// func cType(t string) (string, bool) {
+// 	if isClassType(t) {
+// 		return "godot_object", true
+// 	}
 
-	//className := stripName(c.Name)
+// 	if t == "String" {
+// 		return "char", true
+// 	}
 
-	var source []string
+// 	coreType, found := coreTypesGo2Godot[t]
+// 	if found {
+// 		return coreType, true
+// 	}
 
-	// TODO: per -type common stuff
-	// source = append(source,"#include <" + class_name + ".hpp>")
-	// source = append(source,"")
-	// source = append(source,"")
+// 	return t, false
+// }
 
-	// source = append(source,"#include <core/GodotGlobal.hpp>")
-	// source = append(source,"#include <core/CoreTypes.hpp>")
-	// source = append(source,"#include <core/Ref.hpp>")
-
-	// source = append(source,"#include <core/Godot.hpp>")
-	// source = append(source,"")
-
-	// source = append(source,"#include \"__icalls.hpp\"")
-	// source = append(source,"")
-	// source = append(source,"")
-
-	for usedClass, _ := range usedClasses {
-		fmt.Fprintf(os.Stderr, "UsedClass: '%s'\n", usedClass)
-		if !isEnum(usedClass) {
-			source = append(source, "// import usedClass somehow") /// TODO: ref used class "#include <" + strip_name(used_class) + ".hpp>")
-		}
+func gdNativeType(t string, forReturn bool) (string, bool) {
+	if isPrimitive(t) {
+		return t, false
 	}
 
-	source = append(source, "", "")
-
-	//source = append(source,"namespace godot {")
-
-	//core_object_name = ("___static_object_" + strip_name(c["name"])) if c["singleton"] else "this"
-
-	// source = append(source,"")
-	// source = append(source,"")
-
-	// if c["singleton"]:
-	//     source = append(source,"static godot_object *" + core_object_name + ";")
-	//     source = append(source,"")
-	//     source = append(source,"")
-
-	//     # FIXME Test if inlining has a huge impact on binary size
-	//     source = append(source,"static inline void ___singleton_init()")
-	//     source = append(source,"{")
-	//     source = append(source,"\tif (" + core_object_name + " == nullptr) {")
-	//     source = append(source,"\t\t" + core_object_name + " = godot::api->godot_global_get_singleton((char *) \"" + strip_name(c["name"]) + "\");")
-	//     source = append(source,"\t}")
-	//     source = append(source,"}")
-
-	//     source = append(source,"")
-	//     source = append(source,"")
-
-	// if c["instanciable"]:
-	//     source = append(source,"void *" + strip_name(c["name"]) + "::operator new(size_t)")
-	//     source = append(source,"{")
-	//     source = append(source,"\treturn godot::api->godot_get_class_constructor((char *)\"" + c["name"] + "\")();")
-	//     source = append(source,"}")
-
-	//     source = append(source,"void " + strip_name(c["name"]) + "::operator delete(void *ptr)")
-	//     source = append(source,"{")
-	//     source = append(source,"\tgodot::api->godot_object_destroy((godot_object *)ptr);")
-	//     source = append(source,"}")
-
-	for _, method := range c.Methods {
-		methodSig := ""
-
-		fmt.Fprintf(os.Stderr, "Process method '%s'\n", method.Name)
-		methodSig += makeGDNativeType(method.ReturnType, classes)
-		// TODO: method_signature += stripName(c.Name) + "::" + escape_cpp(method["name"]) + "("
-
-		var argDecls []string
-		for _, argument := range method.Arguments {
-			fmt.Fprintf(os.Stderr, "Process argument '%s':%s\n", argument.Name, argument.Type)
-			argDecls = append(argDecls, argument.Name+" "+makeGDNativeType(argument.Type, classes))
-		}
-		methodSig += strings.Join(argDecls, ", ")
-
-		if method.HasVarargs {
-			if len(method.Arguments) > 0 {
-				methodSig += ", "
-			}
-			methodSig += "const Array& __var_args" // TODO:
-		}
-
-		// TODO: methodSig += ")" + (" const" if method["is_const"] and not c["singleton"] else "")
-
-		source = append(source, methodSig+" {")
-
-		// if c["singleton"]:
-		//     source = append(source,"\t___singleton_init();")
-
-		source = append(source, fmt.Sprintf("mb *C.godot_method_bind = godot_method_bind_get_method(%s, %s);", c.Name, method.Name))
-
-		returnStatement := ""
-
-		if method.ReturnType != "void" {
-			// TODO: handle return type
-			if isClassType(method.ReturnType) {
-				if isEnum(method.ReturnType) {
-					returnStatement += "return (" + removeEnumPrefix(method.ReturnType) + ") "
-				} else if isReferenceType(method.ReturnType, classes) {
-					// TODO: handle references
-					returnStatement += "return Ref<" + stripName(method.ReturnType) + ">::__internal_constructor("
-				} else {
-					ret := ""
-					if isClassType(method.ReturnType) {
-						ret = "(" + stripName(method.ReturnType) + " *) "
-					}
-					returnStatement += "return " + ret
-				}
-			} else {
-				returnStatement += "return "
-			}
-		}
-
-		if method.HasVarargs {
-
-			//TODO: handle vararg variant calls
-
-			// if len(method["arguments"]) != 0:
-			//     source = append(source,"\tVariant __given_args[" + str(len(method["arguments"])) + "];")
-
-			// for i, argument in enumerate(method["arguments"]):
-			//     source = append(source,"\tgodot::api->godot_variant_new_nil((godot_variant *) &__given_args[" + str(i) + "]);")
-
-			// source = append(source,"")
-
-			// for i, argument in enumerate(method["arguments"]):
-			//     source = append(source,"\t__given_args[" + str(i) + "] = " + escape_cpp(argument["name"]) + ";")
-
-			// source = append(source,"")
-
-			// size = ""
-			// if method["has_varargs"]:
-			//     size = "(__var_args.size() + " + str(len(method["arguments"])) + ")"
-			// else:
-			//     size = "(" + str(len(method["arguments"])) + ")"
-
-			// source = append(source,"\tgodot_variant **__args = (godot_variant **) alloca(sizeof(godot_variant *) * " + size + ");")
-
-			// source = append(source,"")
-
-			// for i, argument in enumerate(method["arguments"]):
-			//     source = append(source,"\t__args[" + str(i) + "] = (godot_variant *) &__given_args[" + str(i) + "];")
-
-			// source = append(source,"")
-
-			// if method["has_varargs"]:
-			//     source = append(source,"\tfor (int i = 0; i < __var_args.size(); i++) {")
-			//     source = append(source,"\t\t__args[i + " + str(len(method["arguments"])) + "] = (godot_variant *) &((Array &) __var_args)[i];")
-			//     source = append(source,"\t}")
-
-			// source = append(source,"")
-
-			// source = append(source,"\tVariant __result;")
-			// source = append(source,"\t*(godot_variant *) &__result = godot::api->godot_method_bind_call(mb, (godot_object *) " + core_object_name + ", (const godot_variant **) __args, " + size + ", nullptr);")
-
-			// source = append(source,"")
-
-			// for i, argument in enumerate(method["arguments"]):
-			//     source = append(source,"\tgodot::api->godot_variant_destroy((godot_variant *) &__given_args[" + str(i) + "]);")
-
-			// source = append(source,"")
-
-			// if method["return_type"] != "void":
-			//     cast = ""
-			//     if is_class_type(method["return_type"]):
-			//         if isReferenceType(method["return_type"]):
-			//             cast += "Ref<" + strip_name(method["return_type"]) + ">::__internal_constructor(__result);"
-			//         else:
-			//             cast += "(" + strip_name(method["return_type"]) + " *) (Object *) __result;"
-			//     else:
-			//         cast += "__result;"
-			//     source = append(source,"\treturn " + cast)
-
-		} else {
-
-			var args []string
-			for _, arg := range method.Arguments {
-				args = append(args, getICallTypeName(arg.Type))
-			}
-
-			icallRetType := getICallTypeName(method.ReturnType)
-			sig := GodotCallSigKey{icallRetType, strings.Join(args, ",")}
-			icalls[sig] = setMember
-			icallName := "whatevs" // TODO:getICallNamegetICallName(sig)
-
-			argNames := []string{"o"}
-			for _, arg := range method.Arguments {
-				// TODO: escape Go reserved words
-				argNames = append(argNames, arg.Name)
-				//TODO: escape_cpp(arg["name"]) + (".ptr()" if isReferenceType(arg["type"]) else "")
-			}
-			returnStatement += fmt.Sprintf("%s(%s)", icallName, strings.Join(argNames, ","))
-
-			source = append(source, "\t"+returnStatement) // TODO (")" if isReferenceType(method.ReturnType else "") + ";")
-		}
-
-		source = append(source, "", "")
-	}
-
-	source = append(source, "}")
-	return strings.Join(source, "\n")
-}
-
-func cType(t string) string {
 	if isClassType(t) {
-		return "godot_object *"
+		return "godot_object", true
 	}
 
 	if t == "String" {
-		return "char *"
+		return "char", true
 	}
 
 	coreType, found := coreTypesGo2Godot[t]
 	if found {
-		return coreType + " *"
+		return coreType, !forReturn
 	}
 
-	return t + " "
+	return t, false
 }
 
-func gdNativeType(t string) string {
-	if t == "int" {
-		return "godot_int"
-	}
-
-	if t == "float" || t == "real" {
-		return "godot_real"
-	}
-
-	if t == "bool" {
-		return "godot_bool"
-	}
-
-	if isClassType(t) {
-		return "godot_object"
-	}
-
-	coreType, found := coreTypesGo2Godot[t]
-	if found {
-		return coreType
-	}
-
-	return t
-}
-
-func getICallTypeName(name string) string {
+// TODO: document what this is for
+// basically it collapses everything that's
+// not an enum, primitive or core type
+// into Object (godot_object in GDNative)
+// since those types have no explicit
+// representation in the GDNative C API
+func getTypeAlias(name string) string {
 	if isEnum(name) {
 		return "int"
 	}
@@ -771,37 +634,14 @@ func getICallTypeName(name string) string {
 	return name
 }
 
+// TODO: not clear what this affects, compare with CPP bindings
+// and implement or REMOVE
 func isReferenceType(t string, classes map[string]GDAPI) bool {
 	c, found := classes[t]
 	if !found {
 		return false
 	}
 	return c.IsReference
-}
-
-func makeGDNativeType(t string, classes map[string]GDAPI) string {
-	fmt.Fprintf(os.Stderr, "Making GDNativeType for '%s'\n", t)
-	if isEnum(t) {
-		return removeEnumPrefix(t) + " "
-	}
-
-	if isClassType(t) {
-		// TODO fix this CPP shit
-		if isReferenceType(t, classes) {
-			return "Ref<" + stripName(t) + "> "
-		}
-		return stripName(t) + " *"
-	}
-
-	if t == "int" {
-		return "int64_t "
-	}
-
-	if t == "float" || t == "real" {
-		return "double "
-	}
-
-	return stripName(t) + " "
 }
 
 func isEnum(name string) bool {
@@ -820,25 +660,27 @@ func removeEnumPrefix(name string) string {
 	return stripName(name[idx+5:])
 }
 
-func getUsedClasses(g GDAPI) map[string]struct{} {
-	classes := make(map[string]struct{})
-	for _, method := range g.Methods {
-		if isClassType(method.ReturnType) {
-			if _, found := classes[method.ReturnType]; !found {
-				classes[method.ReturnType] = setMember
-			}
-		}
+// TODO: remove if not splitting classes.go
+//
+// func getUsedClasses(g GDAPI) map[string]struct{} {
+// 	classes := make(map[string]struct{})
+// 	for _, method := range g.Methods {
+// 		if isClassType(method.ReturnType) {
+// 			if _, found := classes[method.ReturnType]; !found {
+// 				classes[method.ReturnType] = setMember
+// 			}
+// 		}
 
-		for _, arg := range method.Arguments {
-			if isClassType(arg.Type) {
-				if _, found := classes[arg.Type]; !found {
-					classes[arg.Type] = setMember
-				}
-			}
-		}
-	}
-	return classes
-}
+// 		for _, arg := range method.Arguments {
+// 			if isClassType(arg.Type) {
+// 				if _, found := classes[arg.Type]; !found {
+// 					classes[arg.Type] = setMember
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return classes
+// }
 
 func isClassType(name string) bool {
 	return !(isCoreType(name) || isPrimitive(name))
@@ -879,7 +721,6 @@ func isCoreType(name string) bool {
 var primitiveTypes = map[string]struct{}{
 	"int":   setMember,
 	"bool":  setMember,
-	"real":  setMember,
 	"float": setMember,
 	"void":  setMember,
 }
@@ -887,96 +728,4 @@ var primitiveTypes = map[string]struct{}{
 func isPrimitive(name string) bool {
 	_, ok := primitiveTypes[name]
 	return ok
-}
-
-// generate icall functions
-
-func generateICallImplementation(icalls map[GodotCallSigKey]struct{}) string {
-	var source []string
-	source = append(source, "")
-
-	source = append(source, "#include <gdnative_api_struct.gen.h>")
-	source = append(source, "#include <stdint.h>")
-	source = append(source, "")
-
-	source = append(source, "")
-	source = append(source, "")
-
-	source = append(source, "")
-
-	for icall, _ := range icalls {
-		methodSig := ""
-
-		retType := icall.ReturnType
-		var args []string
-		if icall.ArgTypesStringified != "" {
-			args = strings.Split(icall.ArgTypesStringified, ",")
-		}
-
-		var methodArgs []string
-		for i, arg := range args {
-			// TODO: handle this distinction in Go
-
-			// if isCoreType(arg) {
-			// 	methodSig += arg + "& "
-			// } else
-			methodArg := arg
-			if !isPrimitive(arg) {
-				methodArg = "*Object"
-			}
-
-			methodArgs = append(methodArgs, fmt.Sprintf("arg%d %s", i, methodArg))
-		}
-
-		//methodSig += fmt.Sprintf("func %s(%s) %s", getICallName(icall), strings.Join(methodArgs, ","), gdNativeType(retType))
-
-		source = append(source, methodSig+" {")
-
-		if retType != "void" {
-			source = append(source, "\t"+gdNativeType(retType)+"ret;")
-			if isClassType(retType) {
-				source = append(source, "\tret = nullptr;")
-			}
-		}
-
-		arrIdx := ""
-		if len(args) == 0 {
-			arrIdx = "1"
-		}
-		source = append(source, "\tconst void *args["+arrIdx+"] = {")
-
-		for i, arg := range args {
-
-			wrappedArg := "\t\t"
-			if isPrimitive(arg) || isCoreType(arg) {
-				wrappedArg += "(void *) &arg" + string(i)
-			} else {
-				wrappedArg += "(void *) arg" + string(i)
-			}
-
-			wrappedArg += ","
-			source = append(source, wrappedArg)
-		}
-
-		source = append(source, "\t};")
-		source = append(source, "")
-
-		// handle return type
-		callRetParam := "&ret"
-		if retType == "void" {
-			callRetParam = "nullptr"
-		}
-		source = append(source, "\tgodot::api->godot_method_bind_ptrcall(mb, inst, args, "+callRetParam+");")
-
-		if retType != "void" {
-			source = append(source, "\treturn ret;")
-		}
-
-		source = append(source, "}")
-	}
-
-	source = append(source, "}")
-	source = append(source, "")
-
-	return strings.Join(source, "\n")
 }

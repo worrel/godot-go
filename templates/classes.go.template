@@ -59,9 +59,16 @@ type Class interface {
                 /*
                 {{ $view.MethodDoc $class.Name $method.Name }}
                 */
-                func (o *{{ $view.SetClassName $class.Name $class.Singleton }}) {{ $view.GoMethodName $method.Name }}({{ range $k, $arg := $method.Arguments }}{{ $view.GoArgName $arg.Name }} {{ $view.GoValue $arg.Type }},{{ end }}) {{ $view.GoValue $method.ReturnType }} {
+                func (o *{{ $view.SetClassName $class.Name $class.Singleton }}) {{ $view.GoMethodName $method.Name }}({{ range $k, $arg := $method.Arguments }}{{ $view.GoArgName $arg.Name }} {{ $view.GoValue $arg.Type }},{{ end }} {{ if $method.HasVarargs }}varArgs ...interface{}{{end}}) {{ $view.GoValue $method.ReturnType }} {
                     {{ if $view.Debug }}log.Println("Calling {{ $class.Name }}.{{ $view.GoMethodName $method.Name }}()"){{end}}
 
+                    {{ if $method.HasVarargs }}
+                    {{ $view.VarargsArrayName }} := NewArray()
+                    //for idx, varArg := range varArgs {
+                    //    // TODO: populate varargs array once Array methods implemented
+                    //    log.Println("Vararg idx=", idx, ": ", varArg)
+                    //}
+                    {{ end }}
                     {{ if ne $method.ReturnType "void" }}
                         returnValue := {{ $view.GodotCall $method }}
                         {{ if $view.Debug }}log.Println("  Got return value: ", returnValue){{end}}
